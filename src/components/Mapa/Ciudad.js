@@ -19,6 +19,9 @@ export default class Ciudad {
         this.updated_at = updated_at
     }
 
+    isCreated(){
+        return this.id !== null
+    }
 
     static fromSource(e){
         return new Ciudad(

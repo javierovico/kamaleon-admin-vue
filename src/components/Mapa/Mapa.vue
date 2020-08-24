@@ -20,7 +20,7 @@
                         </template>
                         <template v-slot:cell(acciones)="data">
                             <div>
-                                <b-button size="sm" variant="primary" class="mb-2" @click="$router.push(`/mapa/${data.item.id}`)">
+                                <b-button size="sm" variant="primary" class="mb-2" @click="showDepClick(data.item)">
                                     <b-icon icon="eye" aria-label="Help"></b-icon>
                                 </b-button>
                             </div>
@@ -34,7 +34,7 @@
 <!--                        </div>-->
 <!--                    </template>-->
                     <b-pagination
-                            :value="departamentoId"
+                            :value="depCurrentPage"
                             :per-page="perPage"
                             :total-rows="departamento_totalRow"
                             align="fill"
@@ -64,7 +64,7 @@
                             </template>
                             <template v-slot:cell(acciones)="data">
                                 <div>
-                                    <b-button size="sm" variant="primary" class="mb-2" @click="$router.push(`/mapa/${data.item.id}`)">
+                                    <b-button size="sm" variant="primary" class="mb-2" @click="showCiuClick(data.item)">
                                         <b-icon icon="eye" aria-label="Help"></b-icon>
                                     </b-button>
                                 </div>
@@ -72,23 +72,30 @@
                         </b-table>
                     </b-col>
                     <b-col cols="12">
-<!--                        <template>-->
-<!--                            <div class="overflow-auto">-->
-<!--                                <b-pagination-nav :link-gen="ciudad_linkGen" :number-of-pages="departamento_lastPage" use-router></b-pagination-nav>-->
-<!--                            </div>-->
-<!--                        </template>-->
-<!--                        <b-pagination-->
-<!--                                v-model="ciudad_currentPage"-->
-<!--                                :total-rows="ciudad_totalRows"-->
-<!--                                :per-page="perPage"-->
-<!--                                align="fill"-->
-<!--                                size="sm"-->
-<!--                                class="my-0"-->
-<!--                                @change="cargarCiudades()"-->
-<!--                        ></b-pagination>-->
+                        <b-pagination
+                                :value="ciuCurrentPage"
+                                :per-page="perPage"
+                                :total-rows="ciudad_totalRows"
+                                align="fill"
+                                size="sm"
+                                class="my-0"
+                                @change="ciudadPaginationClick"
+                        ></b-pagination>
                     </b-col>
                 </b-col>
             </template>
+            <b-col cols="12" v-if="puntosMapa.length>0">
+                <GmapMap
+                        :center="{lat:-25, lng:-56}"
+                        :zoom="7"
+                        map-type-id="terrain"
+                        style="width: 100%; height: 700px"
+                >
+                    <GmapPolygon
+                            :paths="puntosMapa"
+                    />
+                </GmapMap>
+            </b-col>
         </b-row>
     </b-container>
 </template>
@@ -105,18 +112,22 @@
                 // type: String,
                 default: null
             },
+            ciudadId:{
+                type: [Number,null]
+            },
             depCurrentPage:{
                 default:1
             },
             ciuCurrentPage:{
                 default:1
-            }
+            },
         },
         computed:{
 
         },
         data(){
             return {
+                puta:2,
                 departamento_totalRow:1000,
                 perPage:10,
                 sortBy:'numero',
@@ -143,7 +154,7 @@
                     }
                 ],
                 ciudad_currentPage:1,
-                ciudad_totalRows:1,
+                ciudad_totalRows:1000,
                 ciudad_sortBy:'numero',
                 ciudad_sortDesc: false,
                 ciudad_cargando: false,
@@ -166,6 +177,8 @@
                 departamentos: [],
                 departamentoSelected:new Departamento(),
                 ciudades:[],
+                ciudadSelected: new Ciudad(),
+                puntosMapa:[],
             }
         },
         watch: {
@@ -175,13 +188,25 @@
             sortDesc(){
                 this.cargarDepartamentos(1)
             },
+            ciudad_sortBy() {
+                this.cargarDepartamentos(1)
+            },
+            ciudad_sortDesc(){
+                this.cargarDepartamentos(1)
+            },
             departamentoId(){
                 const dep = this.departamentos.find(dep=>dep.id === this.departamentoId)
                 this.departamentoSelected =  dep? (Departamento.fromSource(dep)):null
                 this.cargarCiudades(1)
             },
+            ciudadId(){
+                this.cargarCiudadPrincipal()
+            },
             depCurrentPage(){
                 this.cargarDepartamentos()
+            },
+            ciuCurrentPage(){
+                this.cargarCiudades()
             }
         },
         mounted(){
@@ -192,9 +217,12 @@
             if(!this.departamentoSelected.isCreated()){
                 this.cargarDepartamentoPrincipal()
             }
+            if(!this.ciudadSelected.isCreated()){
+                this.cargarCiudadPrincipal()
+            }
         },
         methods:{
-            cargarCiudades(page = 1){
+            cargarCiudades(){
                 if(this.ciudad_cargando)
                     return
                 this.ciudades.splice(0,this.ciudades.length)
@@ -203,7 +231,7 @@
                 }
                 this.ciudad_cargando = true
                 axios.get(`location/departamento/${this.departamentoId}/ciudad`,{params:{
-                    page: page,
+                    page: this.ciuCurrentPage,
                     perPage: this.perPage,
                     sortBy: this.ciudad_sortBy.length>0?(this.ciudad_sortBy):null,
                     direction: this.ciudad_sortDesc?'desc':'asc',
@@ -212,7 +240,6 @@
                     response.data.data.forEach(dep=>{
                         this.ciudades.push(Ciudad.fromSource(dep))
                     })
-                    this.ciudad_currentPage = page
                     this.ciudad_totalRows = response.data.total
                     this.ciudad_cargando = false
                 })
@@ -237,7 +264,10 @@
                 })
             },
             departamentoPaginationClick(page){
-                this.$router.push(addQuery({depCurrentPage: page},this.$route))
+                this.$router.push(addQuery(this.$route,{add:{depCurrentPage: page}}))
+            },
+            ciudadPaginationClick(page){
+                this.$router.push(addQuery(this.$route,{add:{ciuCurrentPage: page}}))
             },
             cargarDepartamentoPrincipal(){
                 if(this.departamentoId === null){
@@ -247,17 +277,21 @@
                     this.departamentoSelected = response.data.data
                 })
             },
-            departamento_linkGen(pageNum) {
-                return {
-                    query:{
-                        depCurrentPage: pageNum
-                    }
+            cargarCiudadPrincipal(){
+                if(this.ciudadId === null){
+                    return
                 }
-                // return pageNum === 1 ? '?' : `?depCurrentPage=${pageNum}`
+                axios.get(`location/ciudad/${this.ciudadId}/showMap`).then(response=>{
+                    this.puntosMapa = response.data.geo
+                    console.log(response.data)
+                })
             },
-            ciudad_linkGen(pageNum) {
-                return pageNum === 1 ? '?' : `?ciuCurrentPage=${pageNum}`
+            showDepClick(dep){
+                this.$router.push(addQuery(this.$route,{rem:['ciuCurrentPage']},`/mapa/${dep.id}`))
             },
+            showCiuClick(ciu){
+                this.$router.push(addQuery(this.$route,{},`/mapa/${this.departamentoId}/ciudad/${ciu.id}`))
+            }
         }
     }
 </script>

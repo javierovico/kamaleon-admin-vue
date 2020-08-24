@@ -59,9 +59,21 @@ export default new Router({
       props: route=>({
         depCurrentPage: route.query.depCurrentPage?parseInt(route.query.depCurrentPage):1,
         ciuCurrentPage: route.query.ciuCurrentPage?parseInt(route.query.ciuCurrentPage):1,
-        departamentoId: route.params.departamentoId?parseInt(route.params.departamentoId):null
+        departamentoId: route.params.departamentoId?parseInt(route.params.departamentoId):null,
+        ciudadId: null,
       }),
-      // props: true,
+      beforeEnter: ifAuthenticated
+    },
+    {
+      path: "/mapa/:departamentoId/ciudad/:ciudadId",
+      name: "Mapa",
+      component: Mapa,
+      props: route=>({
+        depCurrentPage: route.query.depCurrentPage?parseInt(route.query.depCurrentPage):1,
+        ciuCurrentPage: route.query.ciuCurrentPage?parseInt(route.query.ciuCurrentPage):1,
+        departamentoId: route.params.departamentoId?parseInt(route.params.departamentoId):null,
+        ciudadId: route.params.ciudadId?parseInt(route.params.ciudadId):null,
+      }),
       beforeEnter: ifAuthenticated
     },
   ]

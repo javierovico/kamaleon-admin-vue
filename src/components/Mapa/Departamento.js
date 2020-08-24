@@ -21,6 +21,7 @@ export default class Departamento {
         this.updated_at = updated_at
         this.ciudades_count = ciudades_count
     }
+
     isCreated(){
         return this.id !== null
     }
