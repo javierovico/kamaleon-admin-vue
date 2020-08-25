@@ -6,6 +6,7 @@ import Login from "@/components/login";
 import store from "../store";
 import Puntos from "@/components/puntos/Puntos";
 import Mapa from "@/components/Mapa/Mapa";
+import MapaPrueba from "@/components/Mapa/MapaPrueba";
 
 Vue.use(Router);
 
@@ -66,7 +67,7 @@ export default new Router({
     },
     {
       path: "/mapa/:departamentoId/ciudad/:ciudadId",
-      name: "Mapa",
+      name: "Mapa2",
       component: Mapa,
       props: route=>({
         depCurrentPage: route.query.depCurrentPage?parseInt(route.query.depCurrentPage):1,
@@ -74,6 +75,12 @@ export default new Router({
         departamentoId: route.params.departamentoId?parseInt(route.params.departamentoId):null,
         ciudadId: route.params.ciudadId?parseInt(route.params.ciudadId):null,
       }),
+      beforeEnter: ifAuthenticated
+    },
+    {
+      path: "/mapa-prueba",
+      name: "MapaPrueba",
+      component: MapaPrueba,
       beforeEnter: ifAuthenticated
     },
   ]
