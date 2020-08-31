@@ -18,3 +18,7 @@ export function addQuery(router,query = {},path = null) {
     }
     return nuevaRuta
 }
+
+export const URL = 'http://192.168.0.4:81/api'
+
+export const URL_WEB = 'http://192.168.0.4:81'

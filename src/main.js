@@ -14,9 +14,12 @@ window.$ = window.jQuery = require('jquery')
 import VueSimpleAlert from "vue-simple-alert";
 // import $ from 'jquery'
 import 'bootstrap-notify';
+import {URL} from "@/Utils";
+// import Krpano from "vue-krpano";
 Vue.config.productionTip = false
 Vue.use(BootstrapVue)
 Vue.use(IconsPlugin)
+// Vue.use(Krpano);
 Vue.use(VueFab, /* {
   ----------------------
   // opitons 可选iconfont图标或MaterialIcons
@@ -32,7 +35,7 @@ Vue.use(VueGoogleMaps, {
     libraries: "places,geometry", // necessary for places input
   }
 });
-axios.defaults.baseURL = 'http://192.168.0.4:81/api';
+axios.defaults.baseURL = URL;
 axios.defaults.headers.post['Content-Type'] = 'application/json';
 const token = localStorage.getItem('user-token')
 if (token) {

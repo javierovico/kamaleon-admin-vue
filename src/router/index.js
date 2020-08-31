@@ -48,9 +48,16 @@ export default new Router({
       beforeEnter: ifNotAuthenticated
     },
     {
-      path: "/puntos",
+      path: "/puntos/:tourId?",
       name: "Puntos",
       component: Puntos,
+      props: route=>({
+        puntoCurrentPage: route.query.puntoCurrentPage?parseInt(route.query.puntoCurrentPage):1,
+        puntoBuscar: route.query.buscar?route.query.buscar:null,
+        puntoSortBy: route.query.puntoSortBy?route.query.puntoSortBy:null,
+        puntoSortByDesc: route.query.puntoSortByDesc?parseInt(route.query.puntoSortByDesc)===1:false,
+        tourId: route.params.tourId?parseInt(route.params.tourId):null,
+      }),
       beforeEnter: ifAuthenticated
     },
     {

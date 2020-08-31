@@ -9,20 +9,21 @@
   },
   "dependencies": {
     "core-js": "^3.6.5",
-    "vue": "^2.6.11"
+    "vue": "^2.6.11",
+    "vue-krpano": "^1.5.3",
+    "vuejs-vr": "^1.1.0"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.5.0",
     "@vue/cli-plugin-eslint": "~4.5.0",
     "@vue/cli-service": "~4.5.0",
-    "babel-eslint": "^10.1.0",
-    "eslint": "^6.7.2",
-    "eslint-plugin-vue": "^6.2.2",
-    "vue-template-compiler": "^2.6.11",
     "axios": "^0.19.2",
+    "babel-eslint": "^10.1.0",
     "bootstrap": "^4.5.0",
     "bootstrap-notify": "^3.1.3",
     "bootstrap-vue": "^2.15.0",
+    "eslint": "^6.7.2",
+    "eslint-plugin-vue": "^6.2.2",
     "jquery": "^3.5.1",
     "sass": "^1.26.10",
     "sass-loader": "^9.0.1",
@@ -31,6 +32,7 @@
     "vue-number-picker": "0.0.1",
     "vue-router": "^3.3.4",
     "vue-simple-alert": "^1.1.1",
+    "vue-template-compiler": "^2.6.11",
     "vue2-datepicker": "^3.6.1",
     "vue2-google-maps": "^0.10.7",
     "vue2-timepicker": "^1.1.3",
@@ -38,6 +40,9 @@
     "vuex": "^3.5.1"
   },
   "eslintConfig": {
+    "globals": {
+      "_": false
+    },
     "root": true,
     "env": {
       "node": true

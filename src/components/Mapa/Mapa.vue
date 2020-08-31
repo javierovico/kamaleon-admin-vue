@@ -44,7 +44,7 @@
                     ></b-pagination>
                 </b-col>
             </b-col>
-            <template v-if="departamentoSelected !== null">
+            <template v-if="departamentoSelected.isCreated()">
                 <b-col cols="6">
                     <b-col cols="12">
                         <h2>Ciudades de {{departamentoSelected.nombre}}</h2>
