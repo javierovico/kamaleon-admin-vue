@@ -9,6 +9,8 @@ export default class Pano{
     activo
     created_at
     updated_at
+    //count
+    pano_destino_count
     //calculados
     position = null
 
@@ -23,6 +25,7 @@ export default class Pano{
         activo = null,
         created_at = null,
         updated_at = null,
+        pano_destino_count = 0
     ) {
         this.id = id
         this.nombre = nombre
@@ -34,6 +37,7 @@ export default class Pano{
         this.activo = activo
         this.created_at = created_at
         this.updated_at = updated_at
+        this.pano_destino_count = pano_destino_count
         if(this.hasPosition()){
             this.position = {
                 lat: this.gps_lat,
@@ -58,6 +62,7 @@ export default class Pano{
             e.activo,
             e.created_at,
             e.updated_at,
+            e.pano_destino_count
         )
     }
 }

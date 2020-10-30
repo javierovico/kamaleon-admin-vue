@@ -36,6 +36,9 @@
                 </b-col>
                 <b-col cols="12">
                     <button @click="crearHotspot">Crear Hotspot</button>
+                    <button @click="quitarHotspot">Quitar Hotspot</button>
+                    <button @click="crearHotspotImagen">Crear Hotspot de Imagen</button>
+                    <button @click="crearHotspotInfo">Crear Hotspot de Info</button>
                 </b-col>
             </b-row>
             <b-row cols="12">
@@ -104,6 +107,7 @@
                     {key:'nombre'},
                     {key:'zoom'},
                     {key:'gps', formatter:(value,item,key)=>(key.gps_lat && key.gps_lng)?'si':'no'},
+                    {key:'pano_destino_count', label:'Conexiones'},
                     {key:'acciones'},
                 ],
                 cargando:false,
@@ -157,7 +161,8 @@
                         'ROOT_URL' : `/public`,
                         'URL_GENERADOR_THUMB': `${URL}/pano/?/thumbnail`
                     },
-                    onready: this.cargado1
+                    onready: this.cargado1,
+                    consolelog:true
                 });
                 window.embedpano({
                     xml:`${URL}/tour/${this.tourId}/xml?editar=true`,
@@ -174,7 +179,8 @@
                         'ROOT_URL' : `/public`,
                         'URL_GENERADOR_THUMB': `${URL}/pano/?/thumbnail`
                     },
-                    onready: this.cargado2
+                    onready: this.cargado2,
+                    consolelog:true
                 });
             },
             abrirPano(pano,pantalla){
@@ -185,6 +191,67 @@
             },
             cargado2(car){
                 this.pano2 = car
+            },
+            quitarHotspot(){
+                const fuenteId = parseInt(this.pano1.get('xml.scene').toString().substr(4))
+                const destinoId = parseInt(this.pano2.get('xml.scene').toString().substr(4))
+                if(fuenteId === destinoId){
+                    alert('no pueden ser el mismo')
+                    return
+                }
+                axios.post(`/tour/${this.tourId}/remHotspot`,{
+                    fuente: fuenteId,
+                    destino: destinoId,
+                }).then(()=>{
+                    this.loadTour()
+                }).catch((error)=>{
+                    alert('error')
+                    console.log(error.response)
+                })
+            },
+            crearHotspotImagen(){
+                const fuenteId = parseInt(this.pano1.get('xml.scene').toString().substr(4))
+                const en_h = this.pano1.get('view.hlookat')
+                const en_v = this.pano1.get('view.vlookat')
+                const nombre = prompt('Nombre','abrir');
+                const icono_id = prompt('Icono Id','1');
+                const imagen_id = prompt('Imagen Id','1');
+                const sonido_id = prompt('Sonido Id','');
+                axios.post(`/tour/${this.tourId}/addHotspotImagen?XDEBUG_SESSION_START=PHPSTORM`,{
+                    fuente: fuenteId,
+                    en_h: en_h,
+                    en_v: en_v,
+                    icono_id: icono_id,
+                    imagen_id: imagen_id,
+                    sonido_id: sonido_id,
+                    nombre:nombre
+                }).then(()=>{
+                    // this.loadTour()
+                    console.log('hotspot craedo')
+                }).catch((error)=>{
+                    alert('error')
+                    console.log(error.response)
+                })
+            },
+            crearHotspotInfo(){
+                const fuenteId = parseInt(this.pano1.get('xml.scene').toString().substr(4))
+                const en_h = this.pano1.get('view.hlookat')
+                const en_v = this.pano1.get('view.vlookat')
+                const titulo = prompt('Titulo','');
+                const informacion = prompt('Informacion','');
+                axios.post(`/tour/${this.tourId}/addHotspotInfo?XDEBUG_SESSION_START=PHPSTORM`,{
+                    fuente: fuenteId,
+                    en_h: en_h,
+                    en_v: en_v,
+                    titulo: titulo,
+                    informacion: informacion
+                }).then(()=>{
+                    // this.loadTour()
+                    console.log('hotspot craedo')
+                }).catch((error)=>{
+                    alert('error')
+                    console.log(error.response)
+                })
             },
             crearHotspot(){
                 const fuenteId = parseInt(this.pano1.get('xml.scene').toString().substr(4))
@@ -198,7 +265,7 @@
                     return
                 }
                 console.log(en_h,en_v,a_h,a_v,fuenteId,destinoId)
-                axios.post(`/tour/${this.tourId}/addHotspot`,{
+                axios.post(`/tour/${this.tourId}/addHotspot?XDEBUG_SESSION_START=PHPSTORM`,{
                     fuente: fuenteId,
                     destino: destinoId,
                     en_h: en_h,
@@ -213,15 +280,15 @@
                 })
             },
             centerMap(){
-                console.log('center')
-                const bounds = new this.google.maps.LatLngBounds()
-                this.panosPosition.forEach(p=>{
-                    bounds.extend(p.position)
-                })
-                console.log(bounds)
-                this.$refs.mapRef.$mapPromise.then((map) => {
-                    map.fitBounds(bounds)
-                })
+                // console.log('center')
+                // const bounds = new this.google.maps.LatLngBounds()
+                // this.panosPosition.forEach(p=>{
+                //     bounds.extend(p.position)
+                // })
+                // console.log(bounds)
+                // this.$refs.mapRef.$mapPromise.then((map) => {
+                //     map.fitBounds(bounds)
+                // })
             },
         },
     }
