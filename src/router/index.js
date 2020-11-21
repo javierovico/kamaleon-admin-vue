@@ -5,8 +5,8 @@ import Account from "@/components/account";
 import Login from "@/components/login";
 import store from "../store";
 import Puntos from "@/components/puntos/Puntos";
-import Mapa from "@/components/Mapa/Mapa";
-import MapaPrueba from "@/components/Mapa/MapaPrueba";
+import ProductoListView from "@/components/producto/ProductoListView";
+import ProductoView from "@/components/producto/ProductoView";
 
 Vue.use(Router);
 
@@ -48,46 +48,24 @@ export default new Router({
       beforeEnter: ifNotAuthenticated
     },
     {
-      path: "/puntos/:tourId?",
-      name: "Puntos",
-      component: Puntos,
+      path: "/producto",
+      name: "Productos",
+      component: ProductoListView,
       props: route=>({
-        puntoCurrentPage: route.query.puntoCurrentPage?parseInt(route.query.puntoCurrentPage):1,
-        puntoBuscar: route.query.buscar?route.query.buscar:null,
-        puntoSortBy: route.query.puntoSortBy?route.query.puntoSortBy:null,
-        puntoSortByDesc: route.query.puntoSortByDesc?parseInt(route.query.puntoSortByDesc)===1:false,
-        tourId: route.params.tourId?parseInt(route.params.tourId):null,
+        page: route.query.page?parseInt(route.query.page):1,
+        empresa_id: route.query.empresa_id?parseInt(route.query.empresa_id):null,
+        propNombre:route.query.nombre?route.query.nombre:'',
       }),
       beforeEnter: ifAuthenticated
     },
     {
-      path: "/mapa/:departamentoId?",
-      name: "Mapa",
-      component: Mapa,
+      path: "/producto/:articulo_id",
+      name: "Productosf",
+      component: ProductoView,
       props: route=>({
-        depCurrentPage: route.query.depCurrentPage?parseInt(route.query.depCurrentPage):1,
-        ciuCurrentPage: route.query.ciuCurrentPage?parseInt(route.query.ciuCurrentPage):1,
-        departamentoId: route.params.departamentoId?parseInt(route.params.departamentoId):null,
-        ciudadId: null,
+        empresa_id: route.query.empresa_id?parseInt(route.query.empresa_id):null,
+        articulo_id: route.params.articulo_id?parseInt(route.params.articulo_id):null,
       }),
-      beforeEnter: ifAuthenticated
-    },
-    {
-      path: "/mapa/:departamentoId/ciudad/:ciudadId",
-      name: "Mapa2",
-      component: Mapa,
-      props: route=>({
-        depCurrentPage: route.query.depCurrentPage?parseInt(route.query.depCurrentPage):1,
-        ciuCurrentPage: route.query.ciuCurrentPage?parseInt(route.query.ciuCurrentPage):1,
-        departamentoId: route.params.departamentoId?parseInt(route.params.departamentoId):null,
-        ciudadId: route.params.ciudadId?parseInt(route.params.ciudadId):null,
-      }),
-      beforeEnter: ifAuthenticated
-    },
-    {
-      path: "/mapa-prueba",
-      name: "MapaPrueba",
-      component: MapaPrueba,
       beforeEnter: ifAuthenticated
     },
   ]
