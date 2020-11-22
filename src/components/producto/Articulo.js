@@ -8,7 +8,9 @@ export default class Articulo {
     updated_at
     descripcion
     //tipos
-    miniatura
+    miniatura = null
+    //para form
+    miniaturaAlzar
 
     constructor(
         id = null,
