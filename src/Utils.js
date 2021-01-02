@@ -19,7 +19,42 @@ export function addQuery(router,query = {},path = null) {
     return nuevaRuta
 }
 
+/*
+fuente:[{
+    title,
+    text,
+    key:
+    obligatorio: [true/false]
+    creacion: [true/false]
+}]
+ */
+export function crearArrayPreguntas(target,fuente){
+    return fuente.filter(c=> (!c.creacion || !target.exists())).map((f,index,arr)=>{
+        let ret =  {
+            title: f.title,
+            text: f.text?f.text:'',
+            inputValue: target[f.key],//usuarioEdit.usuario,
+            preConfirm: input=>{
+                target[f.key] = input
+            },
+        }
+        if(f.inputValidator){
+            ret.inputValidator = f.inputValidator
+        }else if(f.obligatorio){
+            ret.inputValidator = (input) => {
+                if(input.length ===0){
+                    return "Campo Obligatorio"
+                }
+            }
+        }
+        if((index+1) === arr.length){
+            ret.confirmButtonText = 'Guardar'
+            ret.confirmButtonColor = '#36aa32'
+        }
+        return ret
+    })
+}
 // export const URL = 'http://192.168.0.4:81/api'
-export const URL = 'http://api.kamaleon360.com/api'
-
-export const URL_WEB = 'http://192.168.0.4:81'
+// export const URL = 'http://api.kamaleon360.com/api'
+//
+// export const URL_WEB = 'http://192.168.0.4:81'

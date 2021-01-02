@@ -12,6 +12,7 @@
     "google-maps-api-loader": "^1.1.1",
     "vue": "^2.6.11",
     "vue-krpano": "^1.5.3",
+    "vue-sweetalert2": "^4.1.1",
     "vuejs-vr": "^1.1.0"
   },
   "devDependencies": {
@@ -55,7 +56,9 @@
     "parserOptions": {
       "parser": "babel-eslint"
     },
-    "rules": {}
+    "rules": {
+      "no-unused-vars": "off"
+    }
   },
   "browserslist": [
     "> 1%",

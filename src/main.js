@@ -26,6 +26,11 @@ Vue.use(VueFab, /* {
   iconType: 'MaterialDesign'
   // iconType: 'iconfont'
 } */)
+//https://www.npmjs.com/package/vue-sweetalert2
+import VueSweetalert2 from 'vue-sweetalert2';
+import 'sweetalert2/dist/sweetalert2.min.css';
+Vue.use(VueSweetalert2);
+
 Vue.component("loading", Loading);
 Vue.component("center-container", CenterContainer);
 Vue.use(VueSimpleAlert);
@@ -35,7 +40,7 @@ Vue.use(VueGoogleMaps, {
     libraries: "places,geometry", // necessary for places input
   }
 });
-axios.defaults.baseURL = URL;
+axios.defaults.baseURL = process.env.VUE_APP_URL_API;
 axios.defaults.headers.post['Content-Type'] = 'application/json';
 const token = localStorage.getItem('user-token')
 if (token) {
