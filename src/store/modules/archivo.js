@@ -7,6 +7,7 @@ const state = {
     status: "",
     archivos: [],
     audioActual: null,
+    archivoActual: null,
 };
 
 const getters = {
@@ -110,11 +111,14 @@ const mutations = {
             state.audioActual.currentTime = 0;
             state.audioActual.src = ''
         }
-        state.archivos.forEach(t=> {
-            t._reproduciendo = false
-        })
+        if(state.archivoActual){
+            state.archivoActual._reproduciendo = false
+        }
     },
     archivo_reproducir_sonido: (state,{archivo}) => {
+        if(state.archivoActual){
+            state.archivoActual._reproduciendo = false
+        }
         if(state.audioActual){
             state.audioActual.pause();
             state.audioActual.currentTime = 0;
@@ -123,10 +127,8 @@ const mutations = {
             state.audioActual = new Audio(archivo.url)
         }
         state.audioActual.play()
-        state.archivos.forEach(t=> {
-            t._reproduciendo = false
-        })
         archivo._reproduciendo = true
+        state.archivoActual = archivo
     },
     archivo_modificado: (state,{archivo}) =>{
         let archivoBase = state.archivos.find(t=>t.id === archivo.id)

@@ -1,5 +1,6 @@
 import ClaseModel from "@/store/modelos/ClaseModel";
 import Archivo from "@/store/modelos/Archivo";
+import Pano from "@/store/modelos/Pano";
 
 export default class Tour extends ClaseModel{
     id
@@ -10,6 +11,8 @@ export default class Tour extends ClaseModel{
     fondo_id
     //relaciones
     fondo
+    //relaciones -array
+    panos
     //visual
     _reproduciendo = false
 
@@ -23,6 +26,7 @@ export default class Tour extends ClaseModel{
         updated_at = null,
         fondo_id = null,
         fondo = null,
+        panos = [],
     ) {
         super();
         this.id = id
@@ -32,6 +36,12 @@ export default class Tour extends ClaseModel{
         this.updated_at = updated_at
         this.fondo_id = fondo_id
         this.fondo = fondo?Archivo.fromSource(fondo):null
+        this.panos = panos
+        this.construirArrays()
+    }
+
+    construirArrays() {
+        this.panos = this.panos?this.panos.map(p=>Pano.fromSource(p)):[]
     }
 
     exists(){
@@ -51,6 +61,7 @@ export default class Tour extends ClaseModel{
             e.updated_at,
             e.fondo_id,
             e.fondo,
+            e.panos,
         )
     }
 }

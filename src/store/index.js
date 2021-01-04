@@ -6,6 +6,7 @@ import punto from "@/store/modules/punto";
 import tour from '@/store/modules/tour'
 import general from "@/store/modules/general";
 import archivo from "@/store/modules/archivo";
+import pano from "@/store/modules/pano";
 Vue.use(Vuex);
 
 const debug = process.env.NODE_ENV !== "production";
@@ -18,6 +19,7 @@ export default new Vuex.Store({
     tour,
     general,
     archivo,
+    pano,
   },
   strict: debug
 });

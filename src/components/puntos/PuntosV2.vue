@@ -42,9 +42,12 @@
                             <strong>Cargando...</strong>
                         </div>
                     </template>
+                    <template #cell(tour)="data">
+                        <h4><b-badge href="!#" @click.prevent="abrirTour(data.item)" :variant="data.item.tour_id?'success':'danger'">{{ data.item.tour_id?'Abrir':'NO'}}</b-badge></h4>
+                    </template>
                     <template v-slot:cell(acciones)="data">
                         <div>
-                            <b-button size="sm" variant="primary" class="mb-2" @click="puntoClick(data.item)" v-if="data.item.tour_id">
+                            <b-button size="sm" variant="primary" class="mb-2" @click="puntoClick(data.item)" v-if="data.item.tour_id"  v-b-tooltip.hover title="Ver Tour">
                                 <b-icon icon="eye" aria-label="Help"></b-icon>
                             </b-button>
                         </div>
@@ -77,6 +80,7 @@
     import {addQuery} from "@/Utils";
     import Panos from "@/components/panos/Panos";
     import {mapActions, mapGetters} from "vuex";
+    import Vue from 'vue'
 
     export default {
         name: "PuntosV2",
@@ -107,7 +111,8 @@
                     {
                         key:'acciones',
                         label:'Accion'
-                    }
+                    },
+                    'tour'
                 ],
                 form:{
                     nombre:'',
@@ -158,7 +163,17 @@
             },
             puntoClick(punto){
                 this.$router.push(addQuery(this.$route,{},`/puntos/${punto.tour_id}`))
-            }
+            },
+            abrirTour(punto){
+                if(punto.tour_id){
+                    this.$router.push(addQuery(this.$route,{},`/tour/${punto.tour_id}`))
+                }else{
+                    Vue.swal.fire({
+                        title:'No se tiene ningun tour asociado',
+                        icon:'error'
+                    })
+                }
+            },
         }
     }
 </script>

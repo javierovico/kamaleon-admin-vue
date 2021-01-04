@@ -8,6 +8,7 @@ import Mapa from "@/components/Mapa/Mapa";
 import MapaPrueba from "@/components/Mapa/MapaPrueba";
 import PuntosV2 from "@/components/puntos/PuntosV2";
 import ToursView from "@/components/tour/ToursView";
+import TourView from "@/components/tour/TourView";
 
 Vue.use(Router);
 
@@ -97,6 +98,19 @@ export default new Router({
             component: ToursView,
             beforeEnter: ifAuthenticated,
             props: route=>({
+                propPage: route.query.tour_page?parseInt(route.query.tour_page):1,
+                propSortBy: route.query.tour_sort_by?route.query.tour_sort_by:null,
+                propSortDesc: route.query.tour_sort_desc?route.query.tour_sort_desc === 'true':false,
+                propBuscar: route.query.tour_buscar?route.query.tour_buscar:'',
+            }),
+        },
+        {
+            path: "/tour/:tourId",
+            name: "TourView",
+            component: TourView,
+            beforeEnter: ifAuthenticated,
+            props: route=>({
+                propTourId: parseInt(route.params.tourId),
                 propPage: route.query.tour_page?parseInt(route.query.tour_page):1,
                 propSortBy: route.query.tour_sort_by?route.query.tour_sort_by:null,
                 propSortDesc: route.query.tour_sort_desc?route.query.tour_sort_desc === 'true':false,
