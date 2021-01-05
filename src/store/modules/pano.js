@@ -132,10 +132,10 @@ const actions = {
         return new Promise((resolve, reject) => {
             commit('pano_cargando');
             let params = {
-                with:['panos.fondo'],
+                // with:['panos.fondo'],
             }
             axios({
-                url: Tour.URL_DESCARGA+`/${id}`+'?XDEBUG_SESSION_START=PHPSTORM',
+                url: Pano.URL_DESCARGA+`/${id}`+'?XDEBUG_SESSION_START=PHPSTORM',
                 params: params,
                 method: 'GET'
             })

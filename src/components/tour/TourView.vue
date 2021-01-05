@@ -77,7 +77,7 @@
                                     <b-button size="sm" variant="outline-info" class="mb-2" @click.prevent="editarTour({tour:data.item})">
                                         <b-icon icon="pencil"  ></b-icon>
                                     </b-button>
-                                    <b-button v-b-tooltip.hover title="Ver SubMotivos" size="sm" variant="outline-info" class="mb-2" @click.prevent="verSubMotivosInterno(data.item.id)">
+                                    <b-button v-b-tooltip.hover title="Ver Panorama" size="sm" variant="outline-info" class="mb-2" @click.prevent="verPanorama(data.item)">
                                         <b-icon icon="eye"  ></b-icon>
                                     </b-button>
                                 </div>
@@ -272,6 +272,9 @@
             archivoSeleccionado(archivo,pano){
                 this.asignarSonidoPano({archivo,pano})
                 this.$bvModal.hide('modal-seleccion-archivo')
+            },
+            verPanorama(pano){
+                this.$router.push(addQuery(this.$route,{},`/pano/${pano.id}`))
             },
         },
     }

@@ -127,6 +127,7 @@ function krpanoplugin()
         var latlngbounds = new google.maps.LatLngBounds();
         var almenosUno = false;
         var scenes = krpano.get("scene").getArray();
+        console.log(scenes)
         for (var i=0; i < scenes.length; i++) {
             var scene = scenes[i];
             if(scene['lat']!=null && scene['lng']!=null){

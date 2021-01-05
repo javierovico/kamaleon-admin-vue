@@ -9,6 +9,7 @@ import MapaPrueba from "@/components/Mapa/MapaPrueba";
 import PuntosV2 from "@/components/puntos/PuntosV2";
 import ToursView from "@/components/tour/ToursView";
 import TourView from "@/components/tour/TourView";
+import PanoView from "@/components/pano/PanoView";
 
 Vue.use(Router);
 
@@ -115,6 +116,16 @@ export default new Router({
                 propSortBy: route.query.tour_sort_by?route.query.tour_sort_by:null,
                 propSortDesc: route.query.tour_sort_desc?route.query.tour_sort_desc === 'true':false,
                 propBuscar: route.query.tour_buscar?route.query.tour_buscar:'',
+            }),
+        },
+        {
+            path: "/pano/:panoId",
+            name: "PanoView",
+            component: PanoView,
+            beforeEnter: ifAuthenticated,
+            props: route=>({
+                propPanoId: parseInt(route.params.panoId),
+                propRoute: route,
             }),
         },
     ]
