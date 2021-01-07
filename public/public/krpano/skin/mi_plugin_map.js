@@ -32,7 +32,7 @@ function krpanoplugin()
         plugin = pluginobject;
 
         // first - say hello
-        krpano.trace(1, "hello from plugin[" + plugin.name + "]");
+        // krpano.trace(1, "hello from plugin[" + plugin.name + "]");
 
         // add plugin attributes
         plugin.registerattribute("mode", "normal");
@@ -64,7 +64,7 @@ function krpanoplugin()
      * Llena el mapa
      */
     function llenarMapa(){
-        krpano.trace(1, "Se puede llenar con idpadre: "+idpadre);
+        // krpano.trace(1, "Se puede llenar con idpadre: "+idpadre);
         // the plugin 'sprite' variable is the internal html element of the plugin
         // plugin.sprite.appendChild(text);
         //javier
@@ -77,7 +77,7 @@ function krpanoplugin()
         div_map.style.cssText = "width:100%;height:100%";
         div_contenedor.appendChild(div_map);
         if(krpano.get("editar")){
-            krpano.trace(1,"Se quiere poner el div loco");
+            // krpano.trace(1,"Se quiere poner el div loco");
             div_info = document.createElement('div');
             div_info.setAttribute('id','info_d_'+idpadre);
             div_info.style.cssText = "width:50%;height:40px;margin:0px auto;background: #889ccf;border: 2px solid #5878ca;position:absolute;top:0px;right:50px";
@@ -127,7 +127,6 @@ function krpanoplugin()
         var latlngbounds = new google.maps.LatLngBounds();
         var almenosUno = false;
         var scenes = krpano.get("scene").getArray();
-        console.log(scenes)
         for (var i=0; i < scenes.length; i++) {
             var scene = scenes[i];
             if(scene['lat']!=null && scene['lng']!=null){
@@ -259,8 +258,11 @@ function krpanoplugin()
      * Este es el que pinta los mapas, porque recibe notificacion al cargar una scene
      */
     function action_dosomething(nombrePano){
-        nro_pano = parseInt(nombrePano.substring(4));
-        krpano.trace(1,"Recibido "+ nro_pano);
+        if(!nombrePano){
+            return;
+        }
+        let nro_pano = parseInt(nombrePano.substring(4));
+        // krpano.trace(1,"Recibido "+ nro_pano);
         //primero pintamos y despintamos los mapas
         for (var k in locations){
             if (locations.hasOwnProperty(k)) {

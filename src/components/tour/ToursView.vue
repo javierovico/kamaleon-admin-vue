@@ -74,10 +74,13 @@
                                     <b-button v-b-tooltip.hover :title="data.item.activo?'Desactivar':'Activar'" :variant="'outline-'+(data.item.activo?'danger':'success')" size="sm" class="mb-2" @click.prevent="toggleEstadoTour({tour:data.item})">
                                         <b-icon font-scale="1" :icon="data.item.activo?'x-circle':'check-circle'" ></b-icon>
                                     </b-button>
-                                    <b-button size="sm" variant="outline-info" class="mb-2" @click.prevent="editarTour({tour:data.item})">
+                                    <b-button v-b-tooltip.hover title="Editar" size="sm" variant="outline-info" class="mb-2" @click.prevent="editarTour({tour:data.item})">
                                         <b-icon icon="pencil"  ></b-icon>
                                     </b-button>
-                                    <b-button v-b-tooltip.hover title="Ver SubMotivos" size="sm" variant="outline-info" class="mb-2" @click.prevent="verSubMotivosInterno(data.item.id)">
+                                    <b-button v-b-tooltip.hover title="Ver Detalles" size="sm" variant="outline-info" class="mb-2" @click.prevent="abrirTour(data.item)">
+                                        <b-icon icon="eye"  ></b-icon>
+                                    </b-button>
+                                    <b-button v-b-tooltip.hover title="Ver en el Visor" size="sm" variant="outline-info" class="mb-2" @click.prevent="verVisor(data.item)">
                                         <b-icon icon="eye"  ></b-icon>
                                     </b-button>
                                 </div>
@@ -276,6 +279,12 @@
             archivoSeleccionado(archivo,tour){
                 this.asignarFondoTour({archivo,tour})
                 this.$bvModal.hide('modal-tour-archivo')
+            },
+            verVisor(tour){
+                this.$router.push(addQuery(this.$route,{},`/tour/${tour.id}/visor`))
+            },
+            abrirTour(tour){
+                this.$router.push(addQuery(this.$route,{},`/tour/${tour.id}`))
             },
         },
     }

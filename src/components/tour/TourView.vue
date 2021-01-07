@@ -101,7 +101,10 @@
                 </b-col>
             </b-row>
         </b-container>
-
+        <PanoView
+                :prop-pano-id="panoIdVisor"
+                :prop-tour-id="tourIdVisor"
+        />
         <b-modal id="modal-seleccion-archivo"
                  title="Sonido de fondo"
                  size="xl"
@@ -123,11 +126,13 @@
     import SinAcceso from "@/components/random/SinAcceso";
     import ArchivoSelectorView from "@/components/archivo/ArchivoSelectorView";
     import Archivo from "@/store/modelos/Archivo";
+    import PanoView from "@/components/pano/PanoView";
     let audioActual = null
 
     export default {
         name: "TourView",
         components: {
+            PanoView,
             ArchivoSelectorView,
             SinAcceso
         },
@@ -145,6 +150,8 @@
         },
         data(){
             return{
+                tourIdVisor: null,
+                panoIdVisor: null,
                 tipo:Archivo.TIPO_SONIDO,
                 cargando:false,
                 totalRow:1000,
@@ -274,7 +281,8 @@
                 this.$bvModal.hide('modal-seleccion-archivo')
             },
             verPanorama(pano){
-                this.$router.push(addQuery(this.$route,{},`/pano/${pano.id}`))
+                // this.$router.push(addQuery(this.$route,{},`/pano/${pano.id}/visor`))
+
             },
         },
     }

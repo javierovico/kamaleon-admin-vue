@@ -14,6 +14,8 @@ export default class Pano extends ClaseModel{
     updated_at
     fondo_id
     tipo
+    //calculadas como atributo
+    urlMiniatura
     //relaciones
     fondo
     //visual
@@ -35,6 +37,7 @@ export default class Pano extends ClaseModel{
         fondo_id = null,
         tipo = null,
         fondo = null,
+        urlMiniatura = '',
     ) {
         super();
         this.id=id
@@ -50,6 +53,7 @@ export default class Pano extends ClaseModel{
         this.fondo_id=fondo_id
         this.tipo=tipo
         this.fondo = fondo?Archivo.fromSource(fondo):null
+        this.urlMiniatura = urlMiniatura
     }
 
     exists(){
@@ -80,6 +84,7 @@ export default class Pano extends ClaseModel{
             e.fondo_id,
             e.tipo,
             e.fondo,
+            e.urlMiniatura,
         )
     }
 }

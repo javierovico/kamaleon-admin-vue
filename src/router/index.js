@@ -119,13 +119,23 @@ export default new Router({
             }),
         },
         {
-            path: "/pano/:panoId",
-            name: "PanoView",
+            path: "/pano/:panoId/visor",
+            name: "visorPano",
             component: PanoView,
-            beforeEnter: ifAuthenticated,
+            // beforeEnter: ifAuthenticated,
             props: route=>({
                 propPanoId: parseInt(route.params.panoId),
-                propRoute: route,
+                propTourId: null,
+            }),
+        },
+        {
+            path: "/tour/:tourId/visor",
+            name: "visorTour",
+            component: PanoView,
+            // beforeEnter: ifAuthenticated,
+            props: route=>({
+                propPanoId: null,
+                propTourId: parseInt(route.params.tourId),
             }),
         },
     ]

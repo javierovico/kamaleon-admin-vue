@@ -46,13 +46,17 @@
                noclip="true"
     />
     <!--    TODO: hacer que se llame luego de cargar dinamicamente nomas-->
-<!--    <action name="startup" autorun="onstart">-->
-<!--        if(startscene === null, copy(startscene,scene[0].name));-->
-<!--        loadscene(get(startscene), null, MERGE);-->
-<!--    </action>-->
+    <action name="startup_aldo">
+        if(startscene === null, copy(startscene,scene[0].name));
+        loadscene(get(startscene), null, MERGE);
+		skin_startup();
+    </action>
 
 <!--    TODO: Carga el js que carga dinamicamente todo-->
-
+    <plugin name="cargador"
+            url="cargador.js"
+			keep="true"
+    />
 
     <!-- TODO:  Crea el evento de escucha para escuchar cambios de panoramas  -->
     <events name="notificarpano" onnewpano="js( establecerPanoActual(get(xml.scene), {{$visor }}));" keep="true"/>
@@ -74,35 +78,6 @@
 
     <!-- puse aca para llenar el id -->
 	<action name="skin_startup" scope="local">
-        <!--        Crear dinamicamente las escenas -->
-<!--        trace('tamano= ',panos.length);-->
-        for(set(i,0), i LT panos.length, inc(i),
-            set(pano,get(panos[get(i)]));
-            txtadd(nombrePano,'pano',get(pano.id));
-            txtadd(thumbnail,get(raizArchivos),'/',get(pano.archivo),'/thumbnail.jpg');
-            trace(nombrePano);
-            set(scene[get(nombrePano)].content, '<image type="CUBE" multires="true" baseindex="0" tilesize="512" devices="!androidstock|webgl"><level tiledimagewidth="1024" tiledimageheight="1024"><front url="https://s3.us-east-2.amazonaws.com/kamaleon360.panos/tupasy_cambios2_0/iglesia_portada/0/0/%v_%u.jpg"/><right url="https://s3.us-east-2.amazonaws.com/kamaleon360.panos/tupasy_cambios2_0/iglesia_portada/1/0/%v_%u.jpg"/><back  url="https://s3.us-east-2.amazonaws.com/kamaleon360.panos/tupasy_cambios2_0/iglesia_portada/2/0/%v_%u.jpg"/><left  url="https://s3.us-east-2.amazonaws.com/kamaleon360.panos/tupasy_cambios2_0/iglesia_portada/3/0/%v_%u.jpg"/><up    url="https://s3.us-east-2.amazonaws.com/kamaleon360.panos/tupasy_cambios2_0/iglesia_portada/4/0/%v_%u.jpg"/><down  url="https://s3.us-east-2.amazonaws.com/kamaleon360.panos/tupasy_cambios2_0/iglesia_portada/5/0/%v_%u.jpg"/></level></image><image type="CUBE" devices="androidstock.and.no-webgl"><front url="https://s3.us-east-2.amazonaws.com/kamaleon360.panos/tupasy_cambios2_0/iglesia_portada/mobile/0.jpg"/><right url="https://s3.us-east-2.amazonaws.com/kamaleon360.panos/tupasy_cambios2_0/iglesia_portada/mobile/1.jpg"/><back  url="https://s3.us-east-2.amazonaws.com/kamaleon360.panos/tupasy_cambios2_0/iglesia_portada/mobile/2.jpg"/><left  url="https://s3.us-east-2.amazonaws.com/kamaleon360.panos/tupasy_cambios2_0/iglesia_portada/mobile/3.jpg"/><up    url="https://s3.us-east-2.amazonaws.com/kamaleon360.panos/tupasy_cambios2_0/iglesia_portada/mobile/4.jpg"/><down  url="https://s3.us-east-2.amazonaws.com/kamaleon360.panos/tupasy_cambios2_0/iglesia_portada/mobile/5.jpg"/></image>');
-            if(pano.gps_lat,
-                set(scene[get(nombrePano)].lat,get(pano.gps_lat));
-                set(scene[get(nombrePano)].lng,get(pano.gps_lng));
-            );
-            set(scene[get(nombrePano)].mostrarMiniaturaInferior, 'true');
-            set(scene[get(nombrePano)].thumburl,get(thumbnail));
-            set(scene[get(nombrePano)].backgroundsound,'');
-            set(scene[get(nombrePano)].backgroundsoundloops,'0');
-            set(scene[get(nombrePano)].haspolygons,'false');
-            set(scene[get(nombrePano)].titleid,get(nombrePano));
-            set(scene[get(nombrePano)].title,'');
-            set(scene[get(nombrePano)].descriptionid,get(pano.nombre));
-            set(scene[get(nombrePano)].multires,'true');
-            set(scene[get(nombrePano)].planar,'false');
-            set(scene[get(nombrePano)].full360,'true');
-            set(scene[get(nombrePano)].video,'false');
-            set(scene[get(nombrePano)].sonido,'');
-            set(scene[get(nombrePano)].seen,'false');
-        );
-        if(startscene === null, copy(startscene,scene[0].name));
-        loadscene(get(startscene), null, MERGE);
 		<!-- apply skin settings on startup -->
 		if(skin_settings.thumbs,
 			if(skin_settings.thumbs_opened,
