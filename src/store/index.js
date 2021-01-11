@@ -8,6 +8,7 @@ import general from "@/store/modules/general";
 import archivo from "@/store/modules/archivo";
 import pano from "@/store/modules/pano";
 import tourSpot from "@/store/modules/tourSpot";
+import visor from "@/store/modules/visor";
 Vue.use(Vuex);
 
 const debug = process.env.NODE_ENV !== "production";
@@ -22,6 +23,7 @@ export default new Vuex.Store({
     archivo,
     pano,
     tourSpot,
+    visor,
   },
   strict: debug
 });

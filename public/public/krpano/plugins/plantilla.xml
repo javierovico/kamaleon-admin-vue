@@ -46,26 +46,27 @@
                noclip="true"
     />
     <!--    TODO: hacer que se llame luego de cargar dinamicamente nomas-->
-    <action name="startup_aldo">
-        if(startscene === null, copy(startscene,scene[0].name));
-        loadscene(get(startscene), null, MERGE);
-		skin_startup();
-    </action>
+<!--    <action name="startup_aldo">-->
+<!--        if(startscene === null, copy(startscene,scene[0].name));-->
+<!--        loadscene(get(startscene), null, MERGE);-->
+<!--		skin_startup();-->
+<!--    </action>-->
 
 <!--    TODO: Carga el js que carga dinamicamente todo-->
-    <plugin name="cargador"
+    <layer name="cargador"
             url="cargador.js"
 			keep="true"
+		   	onloaded="notificar_cargado();"
     />
 
     <!-- TODO:  Crea el evento de escucha para escuchar cambios de panoramas  -->
-    <events name="notificarpano" onnewpano="js( establecerPanoActual(get(xml.scene), {{$visor }}));" keep="true"/>
+    <events enabled="false" name="notificarpano" onnewpano="js( establecerPanoActual(get(xml.scene), 'j'));" keep="true"/>
     <!-- TODO: no se porque, pero parece que se solapa con el de arriba -->
-    <events
-            name="notificarpano"
-            keep="true"
-            enabled="false"
-    />
+<!--    <events-->
+<!--            name="notificarpano"-->
+<!--            keep="true"-->
+<!--            enabled="false"-->
+<!--    />-->
     <!-- Hace que se llame al map listener cada vez que se cambia -->
     <events name="notificarpano_mapa" onnewpano="plugin[skin_map].dosomething(get(xml.scene));" keep="true"/>
     <!--   Prepara el pluggin de sonido -->
@@ -132,7 +133,8 @@
         if(llamada,
             txtadd(llamar_a, 'js(' , get(llamada) , '(get(xml.scene)));');
             set( events[notificarpano].onnewpano ,  get(llamar_a) );
-            set( events[notificarpano].enabled , true);
+		,
+			set( events[notificarpano].onnewpano , '');
         );
 
         if(autorot, set(autorotate.enabled,true),primera_interaccion());

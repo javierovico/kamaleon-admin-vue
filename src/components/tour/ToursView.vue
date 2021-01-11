@@ -15,9 +15,9 @@
                                         <b-button variant="outline-success" class="my-2 my-sm-0" type="submit">Buscar</b-button>
                                     </b-nav-form>
                                     <b-nav-form class="ml-3">
-                                        <b-button @click.prevent="crearMotivo({empresa_id})" variant="info" class="my-2 my-sm-0" type="submit">
+                                        <b-button @click.prevent="crearTourInterno()" variant="info" class="my-2 my-sm-0" type="submit">
                                             <b-icon icon="plus" aria-hidden="true"></b-icon>
-                                            Crear Motivo
+                                            Crear Tour
                                         </b-button>
                                     </b-nav-form>
                                 </b-navbar-nav>
@@ -105,6 +105,10 @@
             </b-row>
         </b-container>
 
+        <PanoView
+                :prop-id="panoId"
+        />
+
         <b-modal id="modal-tour-archivo"
                  title="Sonido de fondo"
                  size="xl"
@@ -126,11 +130,13 @@
     import SinAcceso from "@/components/random/SinAcceso";
     import ArchivoSelectorView from "@/components/archivo/ArchivoSelectorView";
     import Archivo from "@/store/modelos/Archivo";
+    import PanoView from "@/components/pano/PanoView";
     let audioActual = null
 
     export default {
         name: "ToursView",
         components: {
+            PanoView,
             ArchivoSelectorView,
             SinAcceso
         },
@@ -147,10 +153,14 @@
         },
         data(){
             return{
+                panoId:{
+                    tourIdVisor: null,
+                    panoIdVisor: null,
+                },
                 tipo:Archivo.TIPO_SONIDO,
                 cargando:false,
                 totalRow:1000,
-                perPage:15,
+                perPage:5,
                 sortBy:'',
                 sortDesc:false,
                 page:1,
@@ -160,6 +170,7 @@
                     {key:'id', sortable:true},
                     {key:'nombre', sortable:true},
                     {key:'activo', sortable:true},
+                    {key:'panos_count', sortable:true,label:'N. Panos'},
                     {key:'created_at', sortable:true},
                     {key:'updated_at', sortable:true},
                     {key:'fondo_id', sortable:true},
@@ -254,6 +265,7 @@
                         sortBy: this.propSortBy,
                         sortDesc: this.propSortDesc?'desc':'asc',
                         with: ['fondo'],
+                        withCount: ['panos']
                     }
                 }).then(({response})=>{
                     this.totalRow = response.data.total
@@ -281,10 +293,17 @@
                 this.$bvModal.hide('modal-tour-archivo')
             },
             verVisor(tour){
-                this.$router.push(addQuery(this.$route,{},`/tour/${tour.id}/visor`))
+                // this.$router.push(addQuery(this.$route,{},`/tour/${tour.id}/visor`))
+                this.panoId = {
+                    panoIdVisor : null,
+                    tourIdVisor : tour.id,
+                }
             },
             abrirTour(tour){
                 this.$router.push(addQuery(this.$route,{},`/tour/${tour.id}`))
+            },
+            crearTourInterno(){
+
             },
         },
     }

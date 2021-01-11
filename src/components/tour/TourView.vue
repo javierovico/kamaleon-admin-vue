@@ -15,7 +15,7 @@
                                         <b-button variant="outline-success" class="my-2 my-sm-0" type="submit">Buscar</b-button>
                                     </b-nav-form>
                                     <b-nav-form class="ml-3">
-                                        <b-button @click.prevent="crearMotivo({empresa_id})" variant="info" class="my-2 my-sm-0" type="submit">
+                                        <b-button @click.prevent="probar()" variant="info" class="my-2 my-sm-0" type="submit">
                                             <b-icon icon="plus" aria-hidden="true"></b-icon>
                                             Crear Motivo
                                         </b-button>
@@ -102,8 +102,8 @@
             </b-row>
         </b-container>
         <PanoView
-                :prop-pano-id="panoIdVisor"
-                :prop-tour-id="tourIdVisor"
+                :prop-id="panoId"
+                :prop-pano-id="panoVisor"
         />
         <b-modal id="modal-seleccion-archivo"
                  title="Sonido de fondo"
@@ -150,8 +150,13 @@
         },
         data(){
             return{
-                tourIdVisor: null,
-                panoIdVisor: null,
+                // tourIdVisor: null,
+                // panoIdVisor: null,
+                panoId:{
+                    tourIdVisor: null,
+                    panoIdVisor: null,
+                },
+                panoVisor:null, //el pano que se esta viendo (el seleccionado)
                 tipo:Archivo.TIPO_SONIDO,
                 cargando:false,
                 totalRow:1000,
@@ -179,12 +184,13 @@
             this.loadParametros()
             this.cargarTourInterno()
             this.cargarPanosInterno()
-            if(this.propMotivoId){
-                this.$bvModal.show('modal-motivo-submotivo')
-            }
-            if(this.tablaCargada){
-                this.totalRow = this.tours.length
-            }
+
+            // if(this.propMotivoId){
+            //     this.$bvModal.show('modal-motivo-submotivo')
+            // }
+            // if(this.tablaCargada){
+            //     this.totalRow = this.tours.length
+            // }
         },
         destroyed() {
             this.pararArchivoSonido()
@@ -238,6 +244,7 @@
             ...mapActions({
                 cargarTour: 'tour_tour_by_id',
                 cargarPanos: 'pano_cargar_by_tour',
+                cargarPanosByTourId: 'pano_cargar_by_tour_id',
                 toggleEstadoTour: 'tour_view_toggle_estado',
                 editarTour: 'tour_view_editar',
                 reproducirArchivoSonido: 'archivo_view_reproducir_sonido',
@@ -251,13 +258,30 @@
                 this.sortBy = this.propSortBy
                 this.sortDesc = this.propSortDesc
                 this.formBuscar = this.propBuscar
+
+                this.panoId = {
+                    panoIdVisor : null,
+                    tourIdVisor : this.propTourId,
+                }
+                // setTimeout(()=>{
+                //     this.panoId = {
+                //         panoIdVisor : null,
+                //         tourIdVisor : this.propTourId,
+                //     }
+                // }, 6000);
             },
             cargarTourInterno(){
                 this.cargarTour({id:this.propTourId})
             },
             cargarPanosInterno(){
-                this.cargarPanos({
-                    tour:this.tour,
+                // this.cargarPanos({
+                //     tour:this.tour,
+                //     params:{
+                //         with:['fondo'],
+                //     }
+                // })
+                this.cargarPanosByTourId({
+                    id: this.propTourId,
                     params:{
                         with:['fondo'],
                     }
@@ -281,8 +305,12 @@
                 this.$bvModal.hide('modal-seleccion-archivo')
             },
             verPanorama(pano){
+                this.panoVisor = pano.id
                 // this.$router.push(addQuery(this.$route,{},`/pano/${pano.id}/visor`))
-
+                // this.panoId = {
+                //     panoIdVisor : pano.id,
+                //     tourIdVisor : null,
+                // }
             },
         },
     }

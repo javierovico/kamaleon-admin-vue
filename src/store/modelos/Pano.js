@@ -60,14 +60,9 @@ export default class Pano extends ClaseModel{
         return this.id > 0
     }
 
-    getUrlCarga(){
-        let url = `pano`
-        if(this.exists()){
-            url += `/${this.id}`
-        }
-        return url
+    static urlCargaFromId(id){
+        return (id)?(`pano/${id}`):(`pano`)
     }
-
 
     static fromSource(e){
         return new Pano(

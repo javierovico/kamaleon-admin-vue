@@ -9,13 +9,15 @@ function krpanoplugin() {
     //mi propio variable
     const cortes = [2, 4, 7, 13, 24]
     const levels = ['front','right','back','left','up','down']
-    let idpadre = '';    //indica qeu no hay
+    let idpadre = 'kemedesistes';    //indica qeu no hay
     local.registerplugin = function(krpanointerface, pluginpath, pluginobject) {
         krpano = krpanointerface;
         plugin = pluginobject;
         plugin.registerattribute("idpadre",idpadre, set_padre, get_padre);
-        plugin.cargaDinamica = action_cargaDinamica;
-        action_cargaDinamica()
+        plugin.carga_dinamica = action_cargaDinamica;
+        plugin.notificar_cargado = notificar_cargado;
+        plugin.cambiar_pano = cambiar_pano;
+        action_cargaDinamica('iniciado')
     }
 
     function get_padre(){
@@ -35,10 +37,31 @@ function krpanoplugin() {
         return false;
     }
 
+    function cambiar_pano(pano_id) {
+        krpano.call(`loadscene(pano${pano_id}, null, MERGE)`)
+    }
+
+    /**
+     * Notifica que ya se cargo
+     */
+    function notificar_cargado() {
+        const funcionNotificadora = krpano.get('notificar')
+        if(funcionNotificadora){
+            funcionNotificadora()
+        }
+    }
+
     /**
      * carga dinamicamente las scenas
      */
-    function action_cargaDinamica(){
+    function action_cargaDinamica(params){
+        const arrayKrpanoScenes = krpano.get("scene")
+        for(let i = arrayKrpanoScenes.count-1; i >= 0 ; i--){
+            arrayKrpanoScenes.removeItem(i)
+        }
+        // krpano.get("scene").getArray().forEach(e=>{
+        //     krpano.set(`scene[${e.name}].name`,null)
+        // })
         const panoramas = krpano.get('panos')
         const raizArchivos = krpano.get('raizArchivos')
         const tituloPanorama = krpano.get('tituloPanorama')
@@ -79,7 +102,7 @@ function krpanoplugin() {
             contenido += `<image type="CUBE" devices="androidstock.and.no-webgl">`
 
             contenido += `</image>`
-            tourSpots.forEach(spot=>{
+            tourSpots.filter(ts=> ts.fuente === p.id).forEach(spot=>{
                 const destinoPano = panoramas.find(p=> p.id === spot.destino)
                 contenido += `<hotspot name="pano${destinoPano.id}"
                                  url="${destinoPano.urlMiniatura}"
@@ -113,8 +136,11 @@ function krpanoplugin() {
             krpano.set('title',tituloPanorama)
         })
         const scenes = krpano.get("scene").getArray();
-        console.log(scenes)
-        krpano.call(`startup_aldo`)
+        if(scenes.length){
+            //TODO: ver por aca si hace falta cambiar la escena inicial
+            krpano.call(`loadscene(${scenes[0].name}, null, MERGE)`)
+            krpano.call(`skin_startup`)
+        }
     }
 
 }

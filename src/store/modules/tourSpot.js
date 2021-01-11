@@ -105,28 +105,34 @@ const actions = {
             }
         })
     },
-    tourSpot_cargar_by_tour({ commit, dispatch }, {tour,params}) {
+    tourSpot_cargar_by_tour_id({ commit, dispatch }, {id,params,soloRetornar}) {
         return new Promise((resolve, reject) => {
-            commit('tourSpot_cargando');
-            if(tour){
-                axios({
-                    url: tour.getUrlCarga() + TourSpot.URL_DESCARGA+'?XDEBUG_SESSION_START=PHPSTORM',
-                    params: params,
-                    method: 'GET'
+            if(!soloRetornar){
+                commit('tourSpot_cargando');
+            }
+            axios({
+                url: Tour.urlCargaFromId(id) + TourSpot.URL_DESCARGA+'?XDEBUG_SESSION_START=PHPSTORM',
+                params: params,
+                method: 'GET'
+            })
+                .then(response => {
+                    const tourSpots = response.data.data.map(p=>TourSpot.fromSource(p))
+                    if(!soloRetornar){
+                        commit('tourSpot_cargado', {tourSpots})
+                    }
+                    resolve({response,tourSpots})
                 })
-                    .then(response => {
-                        commit('tourSpot_cargado', {response})
-                        resolve({response})
-                    })
-                    .catch(err => {
+                .catch(err => {
+                    if(!soloRetornar){
                         commit('tourSpot_error', err)
                         dispatch('general_error',err)
-                        reject(err)
-                    })
-            }else{
-                return
-            }
+                    }
+                    reject(err)
+                })
         });
+    },
+    tourSpot_cargar_by_tour({ commit, dispatch }, {tour,params}) {
+        return dispatch('tourSpot_cargar_by_tour_id',{id:tour.id,params})
     },
     tourSpot_tourSpot_by_id({ commit, dispatch }, {id}) {
         return new Promise((resolve, reject) => {
@@ -164,9 +170,9 @@ const mutations = {
     tourSpot_cargando: state => {
         state.status = "cargando";
     },
-    tourSpot_cargado: (state,{response}) =>{
+    tourSpot_cargado: (state,{tourSpots}) =>{
         state.status = 'cargado'
-        state.tourSpots = response.data.data.map(p=>TourSpot.fromSource(p))
+        state.tourSpots = tourSpots
     },
     tourSpot_cargado_by_id: (state,{response}) =>{
         state.status = 'cargado'

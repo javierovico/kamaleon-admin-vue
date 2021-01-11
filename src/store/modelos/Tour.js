@@ -11,6 +11,8 @@ export default class Tour extends ClaseModel{
     fondo_id
     //relaciones
     fondo
+    //count
+    panos_count
     //relaciones -array
     panos
     //visual
@@ -27,6 +29,7 @@ export default class Tour extends ClaseModel{
         fondo_id = null,
         fondo = null,
         panos = [],
+        panos_count = 0,
     ) {
         super();
         this.id = id
@@ -37,6 +40,7 @@ export default class Tour extends ClaseModel{
         this.fondo_id = fondo_id
         this.fondo = fondo?Archivo.fromSource(fondo):null
         this.panos = panos
+        this.panos_count = panos_count
         this.construirArrays()
     }
 
@@ -48,8 +52,8 @@ export default class Tour extends ClaseModel{
         return this.id > 0
     }
 
-    getUrlCarga(){
-        return (this.exists())?(`tour/${this.id}`):(`tour`)
+    static urlCargaFromId(id){
+        return (id)?(`tour/${id}`):(`tour`)
     }
 
     static fromSource(e){
@@ -62,6 +66,7 @@ export default class Tour extends ClaseModel{
             e.fondo_id,
             e.fondo,
             e.panos,
+            e.panos_count?e.panos_count:0
         )
     }
 }

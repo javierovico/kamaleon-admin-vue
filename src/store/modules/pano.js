@@ -13,6 +13,7 @@ const state = {
 
 const getters = {
     pano_panos: state => state.panos,
+    pano_find_by_id: state => id => state.panos.find(p=> p.id === id),
     pano_pano_by_id: state => state.panoById,
     pano_cargado: state => state.status === 'cargado',
     pano_cargando: state => state.status === 'cargando'
@@ -105,49 +106,70 @@ const actions = {
             }
         })
     },
-    pano_cargar_by_tour({ commit, dispatch }, {tour,params}) {
+    pano_cargar_by_tour_id({commit,dispatch},{id,params,soloRetornar}){
         return new Promise((resolve, reject) => {
-            commit('pano_cargando');
-            if(tour){
-                axios({
-                    url: tour.getUrlCarga() + Pano.URL_DESCARGA+'?XDEBUG_SESSION_START=PHPSTORM',
-                    params: params,
-                    method: 'GET'
-                })
-                    .then(response => {
-                        commit('pano_cargado', {response})
-                        resolve({response})
-                    })
-                    .catch(err => {
-                        commit('pano_error', err)
-                        dispatch('general_error',err)
-                        reject(err)
-                    })
-            }else{
-                return
-            }
-        });
-    },
-    pano_pano_by_id({ commit, dispatch }, {id}) {
-        return new Promise((resolve, reject) => {
-            commit('pano_cargando');
-            let params = {
-                // with:['panos.fondo'],
+            if(!soloRetornar){
+                commit('pano_cargando');
             }
             axios({
-                url: Pano.URL_DESCARGA+`/${id}`+'?XDEBUG_SESSION_START=PHPSTORM',
+                url: Tour.urlCargaFromId(id) + Pano.URL_DESCARGA+'?XDEBUG_SESSION_START=PHPSTORM',
                 params: params,
                 method: 'GET'
             })
                 .then(response => {
-                    commit('pano_cargado_by_id', {response})
-                    resolve({response})
+                    const panos = response.data.data.map(p=>Pano.fromSource(p))
+                    if(!soloRetornar){
+                        commit('pano_cargado', {panos})
+                    }
+                    resolve({response,panos})
                 })
                 .catch(err => {
-                    commit('pano_error', err)
-                    dispatch('general_error',err)
+                    if(!soloRetornar){
+                        commit('pano_error', err)
+                        dispatch('general_error',err)
+                    }
                     reject(err)
                 })
+        });
+    },
+    pano_cargar_by_tour({ commit, dispatch, getters}, {tour,params}) {
+        return dispatch('pano_cargar_by_tour_id',{id:tour.id,params})
+    },
+    pano_pano_by_id({ commit, dispatch, getters}, {id,soloRetornar}) {
+        return new Promise((resolve, reject) => {
+            if(!soloRetornar){
+                commit('pano_cargando');
+            }
+            let params = {
+                // with:['panos.fondo'],
+            }
+            let pano = getters.pano_find_by_id(id)
+            if(pano){
+                if(!soloRetornar){
+                    commit('pano_cargado_by_id', {pano})
+                }
+                resolve({pano})
+            }else{
+                axios({
+                    url: Pano.urlCargaFromId(id)/*Pano.URL_DESCARGA+`/${id}`*/+'?XDEBUG_SESSION_START=PHPSTORM',
+                    params: params,
+                    method: 'GET'
+                })
+                    .then(response => {
+                        pano = Pano.fromSource(response.data)
+                        if(!soloRetornar){
+                            commit('pano_cargado_by_id', {pano})
+                        }
+                        resolve({response,pano})
+                    })
+                    .catch(err => {
+                        if(!soloRetornar){
+                            commit('pano_error', err)
+                            dispatch('general_error',err)
+                        }
+                        reject(err)
+                    })
+            }
         });
     },
 };
@@ -164,13 +186,13 @@ const mutations = {
     pano_cargando: state => {
         state.status = "cargando";
     },
-    pano_cargado: (state,{response}) =>{
+    pano_cargado: (state,{panos}) =>{
         state.status = 'cargado'
-        state.panos = response.data.data.map(p=>Pano.fromSource(p))
+        state.panos = panos
     },
-    pano_cargado_by_id: (state,{response}) =>{
+    pano_cargado_by_id: (state,{pano}) =>{
         state.status = 'cargado'
-        state.panoById = Pano.fromSource(response.data)
+        state.panoById = pano
     },
     pano_error: (state,error) => {
         state.status = "error";

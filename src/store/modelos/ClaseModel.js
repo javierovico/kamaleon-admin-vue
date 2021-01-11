@@ -1,6 +1,7 @@
 export default class ClaseModel{
 
     static URL_DESCARGA = `/xxxx`
+    static PRIMARY_KEY = `id`
 
     actualizarCambios(sucursalCopia){
         for (let key in sucursalCopia) {
@@ -29,8 +30,12 @@ export default class ClaseModel{
         throw 'Se debe implementar en el hijo'
     }
 
+    // getUrlCarga(){
+    //     throw 'Se debe implementar en el hijo'
+    // }
+
     getUrlCarga(){
-        throw 'Se debe implementar en el hijo'
+        return ClaseModel.urlCargaFromId(this[ClaseModel.PRIMARY_KEY])
     }
 
     getMethodCarga(){
@@ -38,6 +43,10 @@ export default class ClaseModel{
     }
 
     static fromSource(e){
+        throw 'no'
+    }
+
+    static urlCargaFromId(id){
         throw 'no'
     }
 }

@@ -12,6 +12,7 @@ const state = {
 
 const getters = {
     tour_tours: state => state.tours,
+    tour_find_tour: state => id => state.tours.find(t=> t.id === id),
     tour_tour_by_id: state => state.tourById,
     tour_cargado: state => state.status === 'cargado',
     tour_cargando: state => state.status === 'cargando'
@@ -126,26 +127,46 @@ const actions = {
                 })
         });
     },
-    tour_tour_by_id({ commit, dispatch }, {id}) {
+    tour_tour_by_id({ commit, dispatch, getters }, {id,soloRetornar}) {
         return new Promise((resolve, reject) => {
-            commit('tour_cargando');
+            if(!soloRetornar){
+                commit('tour_cargando');
+            }
             let params = {
                 // with:['panos.fondo'],
             }
-            axios({
-                url: Tour.URL_DESCARGA+`/${id}`+'?XDEBUG_SESSION_START=PHPSTORM',
-                params: params,
-                method: 'GET'
-            })
-                .then(response => {
-                    commit('tour_cargado_by_id', {response})
-                    resolve({response})
+            let tourF = getters.tour_find_tour(id)
+            if(tourF){  //tourFind se encontro en los tours ya cargados
+                if(!soloRetornar){
+                    commit('tour_cargado_by_id', {tour:tourF})
+                }
+                resolve({
+                    tour: tourF
                 })
-                .catch(err => {
-                    commit('tour_error', err)
-                    dispatch('general_error',err)
-                    reject(err)
+            }else{
+                axios({
+                    url: Tour.URL_DESCARGA+`/${id}`+'?XDEBUG_SESSION_START=PHPSTORM',
+                    params: params,
+                    method: 'GET'
                 })
+                    .then(response => {
+                        const tour = Tour.fromSource(response.data)
+                        if(!soloRetornar){
+                            commit('tour_cargado_by_id', {tour})
+                        }
+                        resolve({
+                            response,
+                            tour
+                        })
+                    })
+                    .catch(err => {
+                        if(!soloRetornar){
+                            commit('tour_error', err)
+                            dispatch('general_error',err)
+                        }
+                        reject(err)
+                    })
+            }
         });
     },
 };
@@ -190,9 +211,9 @@ const mutations = {
         state.status = 'cargado'
         state.tours = response.data.data.map(p=>Tour.fromSource(p))
     },
-    tour_cargado_by_id: (state,{response}) =>{
+    tour_cargado_by_id: (state,{tour}) =>{
         state.status = 'cargado'
-        state.tourById = Tour.fromSource(response.data)
+        state.tourById = tour
     },
     tour_error: (state,error) => {
         state.status = "error";
