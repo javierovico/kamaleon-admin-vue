@@ -15,9 +15,9 @@
                                         <b-button variant="outline-success" class="my-2 my-sm-0" type="submit">Buscar</b-button>
                                     </b-nav-form>
                                     <b-nav-form class="ml-3">
-                                        <b-button @click.prevent="probar()" variant="info" class="my-2 my-sm-0" type="submit">
+                                        <b-button @click.prevent="abrirPanoramaSelector()" variant="info" class="my-2 my-sm-0" type="submit">
                                             <b-icon icon="plus" aria-hidden="true"></b-icon>
-                                            Crear Motivo
+                                            Asignar Panorama
                                         </b-button>
                                     </b-nav-form>
                                 </b-navbar-nav>
@@ -104,6 +104,7 @@
         <PanoView
                 :prop-id="panoId"
                 :prop-pano-id="panoVisor"
+                prop-id-div="id-tour-view"
         />
         <b-modal id="modal-seleccion-archivo"
                  title="Sonido de fondo"
@@ -113,6 +114,16 @@
             <ArchivoSelectorView
                 :propTipo="tipo"
                 @seleccionado="archivoSeleccionado($event,panoSeleccionFondo)"
+            />
+        </b-modal>
+        <b-modal id="modal-seleccion-panorama"
+                 title="Seleccion Panorama"
+                 size="xl"
+                 :no-enforce-focus="true"
+        >
+            <PanoramaSelector
+                    :propTipo="tipo"
+                    @seleccionado="panoramaSeleccionado($event,tourSeleccionadoPanorama)"
             />
         </b-modal>
     </div>
@@ -127,11 +138,13 @@
     import ArchivoSelectorView from "@/components/archivo/ArchivoSelectorView";
     import Archivo from "@/store/modelos/Archivo";
     import PanoView from "@/components/pano/PanoView";
+    import PanoramaSelector from "@/components/archivo/PanoramaSelectorView";
     let audioActual = null
 
     export default {
         name: "TourView",
         components: {
+            PanoramaSelector,
             PanoView,
             ArchivoSelectorView,
             SinAcceso
@@ -166,6 +179,7 @@
                 page:1,
                 formBuscar:'',
                 panoSeleccionFondo:null,        //guarda el tour que se va agregar fondo
+                tourSeleccionadoPanorama:null,        //guarda el tour que se va agregar panorama
                 columnas:[
                     {key:'id', sortable:true},
                     {key:'nombre', sortable:true},
@@ -252,6 +266,7 @@
                 asignarSonidoPano: 'pano_asignar_fondo',
                 eliminarFondoTour: 'tour_eliminar_fondo',
                 eliminarFondoPano: 'pano_eliminar_fondo',
+                asignarPanorama: 'tour_asignar_panorama'
             }),
             loadParametros(){
                 this.page = this.propPage
@@ -311,6 +326,16 @@
                 //     panoIdVisor : pano.id,
                 //     tourIdVisor : null,
                 // }
+            },
+            abrirPanoramaSelector(){
+                if(this.tour){
+                    this.tourSeleccionadoPanorama = this.tour
+                    this.$bvModal.show('modal-seleccion-panorama')
+                }
+            },
+            panoramaSeleccionado(panorama,tour){
+                this.asignarPanorama({tour,panorama})
+                this.$bvModal.hide('modal-seleccion-panorama')
             },
         },
     }

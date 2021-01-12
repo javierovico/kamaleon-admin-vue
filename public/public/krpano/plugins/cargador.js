@@ -55,6 +55,7 @@ function krpanoplugin() {
      * carga dinamicamente las scenas
      */
     function action_cargaDinamica(params){
+        console.log('jaja')
         const arrayKrpanoScenes = krpano.get("scene")
         for(let i = arrayKrpanoScenes.count-1; i >= 0 ; i--){
             arrayKrpanoScenes.removeItem(i)
@@ -104,6 +105,10 @@ function krpanoplugin() {
             contenido += `</image>`
             tourSpots.filter(ts=> ts.fuente === p.id).forEach(spot=>{
                 const destinoPano = panoramas.find(p=> p.id === spot.destino)
+                if(!destinoPano){
+                    console.warn(`El pano ${p.nombre} tiene un destino id=${spot.destino} no encontrado`)
+                    return
+                }
                 contenido += `<hotspot name="pano${destinoPano.id}"
                                  url="${destinoPano.urlMiniatura}"
                                  thumb="${raizArchivos}/${destinoPano.archivo}/thumbnail_hotspot.png"

@@ -3,7 +3,7 @@
         <b-container fluid>
             <b-row>
                 <b-col cols="12">
-                    <div id="panoId1" style="height:600px;"></div>
+                    <div :id="propIdDiv" style="height:600px;"></div>
                 </b-col>
             </b-row>
         </b-container>
@@ -17,6 +17,7 @@
         props:{
             propId: Object,
             propPanoId:Number,      //el pano que se va estar mostrando
+            propIdDiv:String,       //el nombre del id de la div
             // propPanoId: Number,
             // propTourId: Number,
         },
@@ -65,6 +66,7 @@
                 visorCambiarPano: 'visor_cambiar_pano',
             }),
             cargarDatosVisor(){
+                console.log('2')
                 if(this.propId.tourIdVisor){
                     this.visorCargarByTourId({
                         id:this.propId.tourIdVisor
@@ -78,7 +80,7 @@
                 }
             },
             cargarVisor(){
-                this.visorInicializar({id:'panoId1'})
+                this.visorInicializar({id:this.propIdDiv})
                 // window.removepano("panoId1");
             }
         }

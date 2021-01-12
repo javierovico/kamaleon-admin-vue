@@ -47,6 +47,6 @@ export default class ClaseModel{
     }
 
     static urlCargaFromId(id){
-        throw 'no'
+        throw 'nos'
     }
 }

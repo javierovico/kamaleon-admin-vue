@@ -50,7 +50,6 @@ const actions = {
     },
     tour_guardar_cambios({commit,dispatch,getters},{tour}){
         const callBack = ()=> new Promise((res,rej)=>{
-            let url = tour.getUrlCarga()
             axios({url:tour.getUrlCarga()+`?XDEBUG_SESSION_START=PHPSTORM`, method:tour.getMethodCarga(), data: tour.dataEnvio()}).then(r=>{
                 tour.actualizarCambios(r.data)
                 commit('tour_modificado',{tour})
@@ -79,6 +78,10 @@ const actions = {
                 dispatch('tour_guardar_cambios',{tour:tourModificar})
             }
         })
+    },
+    tour_view_crear_nuevo({dispatch}){
+        let tour = new Tour()
+        dispatch('tour_view_editar',{tour})
     },
     tour_view_editar({commit, dispatch, getters},{tour}){
         let tourEdit = Tour.fromSource(tour)
@@ -169,6 +172,9 @@ const actions = {
             }
         });
     },
+    tour_asignar_panorama({commit},{tour,panorama}){
+        console.log(tour,panorama)
+    },
 };
 
 const mutations = {
@@ -201,7 +207,7 @@ const mutations = {
         if(tourBase){
             tourBase.actualizarCambios(tour)
         }else{
-            state.tours.push(tour)
+            state.tours.splice(0,0,tour)
         }
     },
     tour_cargando: state => {

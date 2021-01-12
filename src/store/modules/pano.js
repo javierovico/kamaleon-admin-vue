@@ -172,6 +172,26 @@ const actions = {
             }
         });
     },
+    pano_cargar({getters},{params,soloRetornar}){
+        return new Promise((resolve,reject)=>{
+            axios({
+                url:Pano.urlCargaFromId(null),
+                params: params,
+                method: 'GET',
+            }).then(response=>{
+                let panos = response.data.data.map(p=>Pano.fromSource(p))
+                if(!soloRetornar){
+                    throw 'falta completar 1ut32xx'
+                }
+                resolve({response,panos})
+            }).catch(err=>{
+                if(!soloRetornar){
+                    throw 'falta completar 11AB58C'
+                }
+                reject(err)
+            })
+        })
+    },
 };
 
 const mutations = {

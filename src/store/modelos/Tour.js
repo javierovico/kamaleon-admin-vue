@@ -22,8 +22,8 @@ export default class Tour extends ClaseModel{
 
     constructor(
         id = null,
-        nombre = null,
-        activo = null,
+        nombre = '',
+        activo = 1,
         created_at = null,
         updated_at = null,
         fondo_id = null,
@@ -50,6 +50,10 @@ export default class Tour extends ClaseModel{
 
     exists(){
         return this.id > 0
+    }
+
+    getUrlCarga(){
+        return Tour.urlCargaFromId(this[ClaseModel.PRIMARY_KEY])
     }
 
     static urlCargaFromId(id){

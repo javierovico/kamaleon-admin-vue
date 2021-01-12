@@ -107,6 +107,7 @@
 
         <PanoView
                 :prop-id="panoId"
+                prop-id-div="tours-id-view"
         />
 
         <b-modal id="modal-tour-archivo"
@@ -244,6 +245,7 @@
                 cargarTours: 'tour_cargar',
                 toggleEstadoTour: 'tour_view_toggle_estado',
                 editarTour: 'tour_view_editar',
+                crearTour: 'tour_view_crear_nuevo',
                 reproducirFondoTour: 'tour_view_reproducir_sonido',
                 pararFondoTour: 'tour_view_parar_sonido',
                 asignarFondoTour: 'tour_asignar_fondo',
@@ -303,7 +305,7 @@
                 this.$router.push(addQuery(this.$route,{},`/tour/${tour.id}`))
             },
             crearTourInterno(){
-
+                this.crearTour()
             },
         },
     }
