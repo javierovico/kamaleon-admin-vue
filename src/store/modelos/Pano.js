@@ -14,6 +14,8 @@ export default class Pano extends ClaseModel{
     updated_at
     fondo_id
     tipo
+    //pivots
+    pivot
     //calculadas como atributo
     urlMiniatura
     //relaciones
@@ -38,6 +40,7 @@ export default class Pano extends ClaseModel{
         tipo = null,
         fondo = null,
         urlMiniatura = '',
+        pivot = null,
     ) {
         super();
         this.id=id
@@ -54,6 +57,7 @@ export default class Pano extends ClaseModel{
         this.tipo=tipo
         this.fondo = fondo?Archivo.fromSource(fondo):null
         this.urlMiniatura = urlMiniatura
+        this.pivot = pivot
     }
 
     exists(){
@@ -62,6 +66,10 @@ export default class Pano extends ClaseModel{
 
     static urlCargaFromId(id){
         return (id)?(`pano/${id}`):(`pano`)
+    }
+
+    getUrlCarga(){
+        return Pano.urlCargaFromId(this[ClaseModel.PRIMARY_KEY])
     }
 
     static fromSource(e){
@@ -80,6 +88,7 @@ export default class Pano extends ClaseModel{
             e.tipo,
             e.fondo,
             e.urlMiniatura,
+            e.pivot,
         )
     }
 }

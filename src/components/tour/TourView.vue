@@ -41,9 +41,6 @@
                                 <strong>Cargando...</strong>
                             </div>
                         </template>
-                        <template #cell(activo)="data">
-                            <h4><b-badge href="!#" @click.prevent="toggleEstadoTour({tour:data.item})" :variant="data.value?'success':'danger'">{{ data.value?'SI':'NO' }}</b-badge></h4>
-                        </template>
                         <template #cell(fondo_id)="data">
                             <template v-if="data.item.fondo && data.item.fondo._reproduciendo">
                                 <b-button size="sm" variant="outline-info" class="mb-2" @click.prevent="pararArchivoSonido()" v-b-tooltip.hover title="Parar">
@@ -71,8 +68,8 @@
                         <template #cell(accion)="data">
                             <template>
                                 <div class="h2 mb-0">
-                                    <b-button v-b-tooltip.hover :title="data.item.activo?'Desactivar':'Activar'" :variant="'outline-'+(data.item.activo?'danger':'success')" size="sm" class="mb-2" @click.prevent="toggleEstadoTour({tour:data.item})">
-                                        <b-icon font-scale="1" :icon="data.item.activo?'x-circle':'check-circle'" ></b-icon>
+                                    <b-button v-b-tooltip.hover title="Desasignar" variant="outline-danger" size="sm" class="mb-2" @click.prevent="desasignarTourInterno(data.item)">
+                                        <b-icon font-scale="1" icon="trash" ></b-icon>
                                     </b-button>
                                     <b-button size="sm" variant="outline-info" class="mb-2" @click.prevent="editarTour({tour:data.item})">
                                         <b-icon icon="pencil"  ></b-icon>
@@ -183,7 +180,6 @@
                 columnas:[
                     {key:'id', sortable:true},
                     {key:'nombre', sortable:true},
-                    {key:'activo', sortable:true},
                     {key:'gps_lat'},
                     {key:'gps_lng'},
                     {key:'created_at', sortable:true},
@@ -333,9 +329,12 @@
                     this.$bvModal.show('modal-seleccion-panorama')
                 }
             },
-            panoramaSeleccionado(panorama,tour){
-                this.asignarPanorama({tour,panorama})
+            panoramaSeleccionado(pano,tour){
+                this.asignarPanorama({tour,pano})
                 this.$bvModal.hide('modal-seleccion-panorama')
+            },
+            desasignarTourInterno(pano){
+                this.$store.dispatch('tour_desasignar_panorama',{tour:this.tour,pano})
             },
         },
     }

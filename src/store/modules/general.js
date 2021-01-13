@@ -1,4 +1,5 @@
 import Vue from 'vue'
+import Tour from "@/store/modelos/Tour";
 const state = {
     status: "",
     categorias: [],
@@ -16,8 +17,36 @@ const mutations = {
 }
 
 const actions = {
-    general_espera ({commit, dispatch, getters}, dato) {
-        const callBack = dato.callBack
+    general_confirmar({getters},{titulo,html,afirmativo}){
+        if(!html){
+            html = `Se guardara un registro de cambio hecho por el usuario ${getters.userName}`
+        }
+        if(!afirmativo){
+            afirmativo = 'SI'
+        }
+        return new Promise((resolve,reject)=>{
+            Vue.swal.fire({
+                title: titulo,
+                html: html,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: afirmativo,
+                cancelButtonText: 'Cancelar',
+            }).then(result=> {
+                if (result.isConfirmed) {
+                    resolve()
+                }else{
+                    reject()
+                }
+            }).catch(e=>{
+                reject(e)
+            })
+        })
+    },
+    general_espera ({commit, dispatch, getters}, {callBack}) {
+        // const callBack = dato.callBack
         Vue.swal.fire({
             icon: 'info',
             allowOutsideClick:false,
@@ -28,7 +57,7 @@ const actions = {
             willOpen: () => {
                 Vue.swal.showLoading()
                 callBack().then(r=>{
-                    const message = r.message
+                    const message = r?r.message:'Correcto'
                     const Toast = Vue.swal.mixin({
                         toast: true,
                         position: 'top-end',

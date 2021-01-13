@@ -31,12 +31,15 @@
             this.cargarVisor()
         },
         computed:{
-            ...mapGetters({
-                visorCargado: 'visor_cargado',
-                visorTitulo: 'visor_titulo',
-                visorPanos: 'visor_panos',
-                visorTourSpots: 'visor_tourSpots',
-            }),
+            // ...mapGetters({
+            //     visorCargado: 'visor_cargado',
+            //     visorTitulo: 'visor_titulo',
+            //     visorPanos: 'visor_panos',
+            //     visorTourSpots: 'visor_tourSpots',
+            // }),
+            visorCargado(){
+                return this.$store.getters.visor_cargado(this.propIdDiv)
+            },
         },
         watch:{
             propId(){
@@ -44,14 +47,14 @@
             },
             propPanoId(p){
                 if(p){
-                    this.visorCambiarPano({pano_id:p})
+                    this.visorCambiarPano({pano_id:p,idVisor:this.propIdDiv})
                 }
             },
             visorCargado(v){
                 if(v){
-                    this.visorActualizar()
+                    this.visorActualizar({idVisor:this.propIdDiv})
                 }else{
-                    this.visorLimpiarPantalla()
+                    this.visorLimpiarPantalla({idVisor:this.propIdDiv})
                 }
             },
         },
@@ -66,21 +69,22 @@
                 visorCambiarPano: 'visor_cambiar_pano',
             }),
             cargarDatosVisor(){
-                console.log('2')
                 if(this.propId.tourIdVisor){
                     this.visorCargarByTourId({
-                        id:this.propId.tourIdVisor
+                        id:this.propId.tourIdVisor,
+                        idVisor:this.propIdDiv
                     })
                 }else if(this.propId.panoIdVisor){
                     this.visorCargarByPanoId({
-                        id:this.propId.panoIdVisor
+                        id:this.propId.panoIdVisor,
+                        idVisor:this.propIdDiv
                     })
                 }else{
-                    this.visorRestablecer()
+                    this.visorRestablecer({idVisor:this.propIdDiv})
                 }
             },
             cargarVisor(){
-                this.visorInicializar({id:this.propIdDiv})
+                this.visorInicializar({idVisor:this.propIdDiv})
                 // window.removepano("panoId1");
             }
         }

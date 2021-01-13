@@ -11,7 +11,7 @@
                             <b-collapse id="nav-collapse" is-nav>
                                 <b-navbar-nav class="ml-auto">
                                     <b-nav-form @submit.prevent="buscarUsuarios()">
-                                        <b-form-input v-model="formBuscar" class="mr-sm-2" placeholder="Archivo..."></b-form-input>
+                                        <b-form-input v-model="formBuscar" class="mr-sm-2" placeholder="Panorama..."></b-form-input>
                                         <b-button variant="outline-success" class="my-2 my-sm-0" type="submit">Buscar</b-button>
                                     </b-nav-form>
 <!--                                    <b-nav-form class="ml-3">-->

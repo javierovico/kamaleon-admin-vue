@@ -4,24 +4,29 @@ import Vue from 'vue'
 import TourSpot from "@/store/modelos/TourSpot";
 
 const state = {
-    statusVisor: {  //indica si ya fueron cargados
-        tour: false,
-        tourSpot: false,
-        panos: false,
-    },
+    instancia_visor: [],
+
+    statusVisor:[],
+    // statusVisor: {  //indica si ya fueron cargados
+    //     tour: false,
+    //     tourSpot: false,
+    //     panos: false,
+    // },
     tourSpots: [],
-    tour: null,
+    tour: [],
     panos: [],
-    instancia: null,        //TODO: ver cuando restablecer
+    instancia: [],        //TODO: ver cuando restablecer
 };
 
 const getters = {
-    visor_tourSpots: state => state.tourSpots,
-    visor_tour: state => state.tour,
-    visor_panos: state => state.panos,
-    visor_cargado: state => (state.statusVisor.tourSpot && state. statusVisor.tour && state.statusVisor.panos),
-    visor_titulo: (state,getters) => {
-        if(!getters.visor_cargado){
+    visor_instancia_visor: state => idVisor => state.instancia_visor.find(o=> o.idVisor === idVisor),
+    visor_tourSpots: (state,getters) => idVisor => getters.visor_instancia_visor(idVisor)?.tourSpots,
+    visor_tour: (state,getters) => idVisor => getters.visor_instancia_visor(idVisor)?.tour,
+    visor_panos: (state,getters) => idVisor => getters.visor_instancia_visor(idVisor)?.panos,
+    visor_status_visor: (state,getters) => idVisor => getters.visor_instancia_visor(idVisor)?.statusVisor,
+    visor_cargado: (state,getters) => idVisor => (getters.visor_status_visor(idVisor) && getters.visor_status_visor(idVisor).tourSpot && getters.visor_status_visor(idVisor).tour && getters.visor_status_visor(idVisor).panos),
+    visor_titulo: (state,getters) => idVisor => {
+        if(!getters.visor_cargado(idVisor)){
             return `No Cargado`
         }else if(state.tour){
             return state.tour.nombre
@@ -29,44 +34,44 @@ const getters = {
             return ``
         }
     },
-    visor_instancia: state => state.instancia,
+    visor_instancia: (state,getters) => idVisor => getters.visor_instancia_visor(idVisor)?.instancia,
 }
 
 const actions = {
-    visor_restablecer({commit,dispatch}){
-        commit('visor_cargando')
+    visor_restablecer({commit,dispatch},{idVisor}){
+        commit('visor_cargando',{idVisor})
     },
-    visor_cargar_by_tour_id({ commit, dispatch }, {id,params}) {  //carga los parametros a parir del tourID
-        dispatch('visor_restablecer')
+    visor_cargar_by_tour_id({ commit, dispatch }, {idVisor,id,params}) {  //carga los parametros a parir del tourID
+        dispatch('visor_restablecer',{idVisor})
         dispatch('tour_tour_by_id',{id,soloRetornar: true}).then(({tour})=>{
-            commit('visor_tour_cargado',{tour})
+            commit('visor_tour_cargado',{tour,idVisor})
         })
         dispatch('pano_cargar_by_tour_id',{id,params,soloRetornar:true}).then(({panos})=>{
-            commit('visor_panos_cargado',{panos})
+            commit('visor_panos_cargado',{panos,idVisor})
         })
         dispatch('tourSpot_cargar_by_tour_id',{id,params,soloRetornar:true}).then(({tourSpots})=>{
-            commit('visor_tourSpot_cargado',{tourSpots})
+            commit('visor_tourSpot_cargado',{tourSpots,idVisor})
         })
     },
-    visor_cargar_by_pano_id({ commit, dispatch }, {id,params}) {  //carga los parametros a parir del panoId
-        dispatch('visor_restablecer')
-        commit('visor_tour_cargado',{tour:null})
-        commit('visor_tourSpot_cargado',{tourSpots:[]})
+    visor_cargar_by_pano_id({ commit, dispatch }, {id,params,idVisor}) {  //carga los parametros a parir del panoId
+        dispatch('visor_restablecer',{idVisor})
+        commit('visor_tour_cargado',{tour:null,idVisor})
+        commit('visor_tourSpot_cargado',{tourSpots:[],idVisor})
         dispatch('pano_pano_by_id',{id,params,soloRetornar:true}).then(({pano})=>{
-            commit('visor_panos_cargado',{panos:[pano]})
+            commit('visor_panos_cargado',{panos:[pano],idVisor})
         })
     },
-    visor_crear_instancia({commit,dispatch, getters},{id}){
+    visor_crear_instancia({commit,dispatch, getters},{idVisor}){
         window.embedpano({
             xml:process.env.BASE_URL+`public/krpano/plugins/plantilla.xml`,
             // id:id,
-            target:id,
+            target:idVisor,
             vars:{
                 "idunico":"nose",
                 "autorot":'false',
                 "editar": false,
                 notificar:()=>{
-                    dispatch('visor_actualizar_pantalla')
+                    dispatch('visor_actualizar_pantalla',{idVisor})
                 },
                 llamada: false,     //establecer a una funcion llamable
                 raizArchivos: process.env.VUE_APP_URL_S3,
@@ -79,30 +84,30 @@ const actions = {
                 'ROOT_URL' : `/public`,
                 'URL_GENERADOR_THUMB': `${URL}/pano/?/thumbnail`
             },
-            onready: (p)=>{
-                commit('visor_instancia_creada',p)
-                dispatch('visor_actualizar_pantalla')
+            onready: (instancia)=>{
+                commit('visor_instancia_creada', {instancia,idVisor})
+                dispatch('visor_actualizar_pantalla',{idVisor})
             },
             consolelog:true
         });
     },
-    visor_actualizar_pantalla({getters}){
-        const instancia = getters.visor_instancia
+    visor_actualizar_pantalla({getters},{idVisor}){
+        const instancia = getters.visor_instancia(idVisor)
         if(instancia){
-            instancia.set(`panos`,getters.visor_panos)
-            instancia.set('tituloPanorama', getters.visor_titulo)
-            instancia.set('tourSpots',getters.visor_tourSpots)
+            instancia.set(`panos`,getters.visor_panos(idVisor))
+            instancia.set('tituloPanorama', getters.visor_titulo(idVisor))
+            instancia.set('tourSpots',getters.visor_tourSpots(idVisor))
             instancia.call(`plugin[cargador].carga_dinamica('actualizado');`)
         }
     },
-    visor_limpiar_pantalla({getters}){
-        const instancia = getters.visor_instancia
+    visor_limpiar_pantalla({getters},{idVisor}){
+        const instancia = getters.visor_instancia(idVisor)
         if(instancia){
             // instancia.call(`trace('Limpiando')`)
         }
     },
-    visor_cambiar_pano({getters},{pano_id}){
-        const instancia = getters.visor_instancia
+    visor_cambiar_pano({getters},{pano_id,idVisor}){
+        const instancia = getters.visor_instancia(idVisor)
         if(instancia){
             instancia.call(`plugin[cargador].cambiar_pano(${pano_id});`)
         }
@@ -110,29 +115,40 @@ const actions = {
 };
 
 const mutations = {
-    visor_cargando: state => {
-        state.tourSpots = []
-        state.panos = []
-        state.tour = null
-        state.statusVisor.panos = false
-        state.statusVisor.tour = false
-        state.statusVisor.tourSpot = false
-
+    visor_cargando: (state,{idVisor}) => {
+        let instancia = state.instancia_visor.find(o=>o.idVisor===idVisor)
+        if(!instancia){
+            instancia = {
+                idVisor:idVisor,
+                statusVisor: {},
+            }
+            state.instancia_visor.push(instancia)
+        }
+        instancia.tourSpots = []
+        instancia.panos = []
+        instancia.tour = null
+        instancia.statusVisor.panos = false
+        instancia.statusVisor.tour = false
+        instancia.statusVisor.tourSpot = false
     },
-    visor_tour_cargado: (state,{tour}) => {
-        state.tour = tour
-        state.statusVisor.tour = true
+    visor_tour_cargado: (state,{tour,idVisor}) => {
+        let instancia = state.instancia_visor.find(o=>o.idVisor===idVisor)
+        instancia.tour = tour
+        instancia.statusVisor.tour = true
     },
-    visor_panos_cargado: (state,{panos}) => {
-        state.panos = panos
-        state.statusVisor.panos = true
+    visor_panos_cargado: (state,{panos,idVisor}) => {
+        let instancia = state.instancia_visor.find(o=>o.idVisor===idVisor)
+        instancia.panos = panos
+        instancia.statusVisor.panos = true
     },
-    visor_tourSpot_cargado: (state,{tourSpots}) => {
-        state.tourSpots = tourSpots
-        state.statusVisor.tourSpot = true
+    visor_tourSpot_cargado: (state,{tourSpots,idVisor}) => {
+        let instancia = state.instancia_visor.find(o=>o.idVisor===idVisor)
+        instancia.tourSpots = tourSpots
+        instancia.statusVisor.tourSpot = true
     },
-    visor_instancia_creada: (state,instancia) => {
-        state.instancia = instancia
+    visor_instancia_creada: (state, {instancia,idVisor}) => {
+        let instanciar = state.instancia_visor.find(o=>o.idVisor===idVisor)
+        instanciar.instancia = instancia
     }
 };
 

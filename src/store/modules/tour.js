@@ -172,8 +172,39 @@ const actions = {
             }
         });
     },
-    tour_asignar_panorama({commit},{tour,panorama}){
-        console.log(tour,panorama)
+    tour_asignar_panorama({dispatch},{tour,pano}){
+        dispatch('general_confirmar',{titulo:'Asignar el panorama al tour?'}).then(()=>{
+            dispatch('general_espera',{
+                callBack:()=> new Promise((resolve,reject)=>{
+                    axios({
+                        url: tour.getUrlCarga() +'/'+ pano.getUrlCarga() + '/asignar',
+                        method:'POST'
+                    })
+                        .catch(err => reject(err))
+                        .then((response)=>{
+                            dispatch('pano_agregar',{pano})
+                            resolve()
+                        })
+                })
+            })
+        })
+    },
+    tour_desasignar_panorama({dispatch,commit},{tour,pano}){
+        dispatch('general_confirmar',{titulo:'Desasignar el panorama del tour?'}).then(()=>{
+            dispatch('general_espera',{
+                callBack: () => new Promise((resolve,reject)=>{
+                    axios({
+                        url: tour.getUrlCarga() +'/'+ pano.getUrlCarga() + '/des-asignar',
+                        method:'DELETE'
+                    })
+                        .catch(err => reject(err))
+                        .then((response)=>{
+                            dispatch('pano_quitar',{pano})
+                            resolve()
+                        })
+                })
+            })
+        })
     },
 };
 

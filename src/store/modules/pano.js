@@ -20,6 +20,12 @@ const getters = {
 }
 
 const actions = {
+    pano_quitar({commit},{pano}){    //quita un pano de la lista
+        commit('pano_quitar',{pano})
+    },
+    pano_agregar({commit},{pano}){    //quita un pano de la lista
+        commit('pano_agregar',{pano})
+    },
     pano_eliminar_fondo({dispatch,getters},{pano}){
         Vue.swal.fire({
             title: `Desasignar fondo del Panorama ${pano.nombre}?`,
@@ -202,6 +208,20 @@ const mutations = {
         }else{
             state.panos.push(pano)
         }
+    },
+    pano_quitar: (state,{pano}) => {
+        const panoIndex = state.panos.findIndex(p=>p.id === pano.id)
+        if(panoIndex){
+            state.panos.splice(panoIndex,1)
+        }else{
+            console.error('No se encontro el pano a quitar')
+        }
+    },
+    pano_agregar: (state,{pano}) => {
+        state.panos.push(pano)
+    },
+    tour_cargado: (state,{response}) =>{
+        console.log(response)
     },
     pano_cargando: state => {
         state.status = "cargando";
