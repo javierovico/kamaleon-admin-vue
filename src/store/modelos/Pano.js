@@ -1,6 +1,8 @@
 import ClaseModel from "@/store/modelos/ClaseModel";
 import Archivo from "@/store/modelos/Archivo";
 
+export const TIPO_TERRESTRE = 1
+
 export default class Pano extends ClaseModel{
     id
     nombre
@@ -27,17 +29,17 @@ export default class Pano extends ClaseModel{
 
     constructor(
         id = null,
-        nombre = null,
+        nombre = '',
         archivo = null,
         contenido = null,
         zoom = null,
-        gps_lat = null,
-        gps_lng = null,
-        activo = null,
+        gps_lat = '',
+        gps_lng = '',
+        activo = 1,
         created_at = null,
         updated_at = null,
         fondo_id = null,
-        tipo = null,
+        tipo = TIPO_TERRESTRE,
         fondo = null,
         urlMiniatura = '',
         pivot = null,
@@ -65,7 +67,7 @@ export default class Pano extends ClaseModel{
     }
 
     static urlCargaFromId(id){
-        return (id)?(`pano/${id}`):(`pano`)
+        return (id)?(`/pano/${id}`):(`/pano`)
     }
 
     getUrlCarga(){

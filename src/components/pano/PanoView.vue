@@ -1,5 +1,6 @@
 <template>
     <div>
+        <button @click.prevent="prueba()">prueba</button>
         <b-container fluid>
             <b-row>
                 <b-col cols="12">
@@ -18,6 +19,8 @@
             propId: Object,
             propPanoId:Number,      //el pano que se va estar mostrando
             propIdDiv:String,       //el nombre del id de la div
+            propH:Number,
+            propV:Number,
             // propPanoId: Number,
             // propTourId: Number,
         },
@@ -37,9 +40,12 @@
             //     visorPanos: 'visor_panos',
             //     visorTourSpots: 'visor_tourSpots',
             // }),
-            visorCargado(){
-                return this.$store.getters.visor_cargado(this.propIdDiv)
-            },
+            // visorCargado(){
+            //     return this.$store.getters.visor_cargado(this.propIdDiv)
+            // },
+            // panoramasVisor(){
+            //     return this.$store.getters.visor_panos(this.propIdDiv)
+            // }
         },
         watch:{
             propId(){
@@ -50,13 +56,18 @@
                     this.visorCambiarPano({pano_id:p,idVisor:this.propIdDiv})
                 }
             },
-            visorCargado(v){
-                if(v){
-                    this.visorActualizar({idVisor:this.propIdDiv})
-                }else{
-                    this.visorLimpiarPantalla({idVisor:this.propIdDiv})
-                }
-            },
+            // visorCargado(v){
+            //     if(v){
+            //         this.visorActualizar({idVisor:this.propIdDiv})
+            //     }else{
+            //         this.visorLimpiarPantalla({idVisor:this.propIdDiv})
+            //     }
+            // },
+            // panoramasVisor() {
+            //     if(this.visorCargado){
+            //         this.visorActualizar({idVisor:this.propIdDiv})
+            //     }
+            // }
         },
         methods:{
             ...mapActions({
@@ -84,8 +95,35 @@
                 }
             },
             cargarVisor(){
-                this.visorInicializar({idVisor:this.propIdDiv})
+                this.visorInicializar({
+                    errorChange: this.errorChange,
+                    panoIdInicial:this.propPanoId,
+                    sceneChange:this.sceneChange,
+                    idVisor:this.propIdDiv,
+                    loadClick:this.clickPos,
+                    viewChange: this.viewChange,
+                    editar:true,
+                    vistaH:this.propH,
+                    vistaV:this.propV,
+                })
                 // window.removepano("panoId1");
+            },
+            prueba(){
+                console.log(this.$store.getters.visor_tourSpots(this.propIdDiv))
+                // console.log(this.$store.getters.visor_panos(this.propIdDiv))
+                // this.$store.dispatch('visor_actualizar_pantalla',{idVisor:this.propIdDiv})
+            },
+            clickPos(panoId,h,v){
+                this.$emit('panoClick',panoId,h,v)
+            },
+            viewChange(panoId,h,v){
+                this.$emit('viewChange', {panoId, h, v})
+            },
+            sceneChange(panoId){
+                this.$emit('panoChange',panoId)
+            },
+            errorChange(error){
+                this.$emit('errorChange',error)
             }
         }
     }

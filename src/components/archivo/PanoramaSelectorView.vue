@@ -174,7 +174,6 @@
             ...mapActions({
                 cargarPanos: 'pano_cargar',
                 toggleEstadoArchivo: 'pano_view_toggle_estado',
-                editarArchivo: 'pano_view_editar',
             }),
             cargarPanosInterno(){
                 this.cargarPanos({

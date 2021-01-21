@@ -10,6 +10,7 @@ import PuntosV2 from "@/components/puntos/PuntosV2";
 import ToursView from "@/components/tour/ToursView";
 import TourView from "@/components/tour/TourView";
 import PanoView from "@/components/pano/PanoView";
+import PanosView from "@/components/pano/PanosView";
 
 Vue.use(Router);
 
@@ -136,6 +137,18 @@ export default new Router({
             props: route=>({
                 propPanoId: null,
                 propTourId: parseInt(route.params.tourId),
+            }),
+        },
+        {
+            path: "/panoramas",
+            name: "Panoramas",
+            component: PanosView,
+            beforeEnter: ifAuthenticated,
+            props: route=>({
+                propPage: route.query.tour_page?parseInt(route.query.tour_page):1,
+                propSortBy: route.query.tour_sort_by?route.query.tour_sort_by:null,
+                propSortDesc: route.query.tour_sort_desc?route.query.tour_sort_desc === 'true':false,
+                propBuscar: route.query.tour_buscar?route.query.tour_buscar:'',
             }),
         },
     ]

@@ -745,8 +745,16 @@
 		skin_loadscene(get(newsceneindex), calc(indexadd LT 0 ? skin_settings.loadscene_blend_prev : skin_settings.loadscene_blend_next));
 	</action>
 
-
+	<!-- javierovico: Hace como puente para ver si el controlador tiene control de los cambios de panoramas  -->
 	<action name="skin_loadscene" scope="local" args="newscenenameorindex, blendmode">
+		if(sceneChange,
+			plugin[cargador].scene_change(get(newscenenameorindex));
+		,
+			skin_loadscene_original(get(newscenenameorindex), get(blendmode));
+		);
+	</action>
+
+	<action name="skin_loadscene_original" scope="local" args="newscenenameorindex, blendmode">
 		if(webvr.isenabled AND scene.count GT 1,
 			set(hotspot[skin_webvr_prev_scene].visible, false);
 			set(hotspot[skin_webvr_next_scene].visible, false);

@@ -15,9 +15,9 @@
                                         <b-button variant="outline-success" class="my-2 my-sm-0" type="submit">Buscar</b-button>
                                     </b-nav-form>
                                     <b-nav-form class="ml-3">
-                                        <b-button @click.prevent="crearTourInterno()" variant="info" class="my-2 my-sm-0" type="submit">
+                                        <b-button @click.prevent="crearPanoInterno()" variant="info" class="my-2 my-sm-0" type="submit">
                                             <b-icon icon="plus" aria-hidden="true"></b-icon>
-                                            Crear Tour
+                                            Crear Panorama
                                         </b-button>
                                     </b-nav-form>
                                 </b-navbar-nav>
@@ -34,7 +34,7 @@
                             responsive
                             striped hover
                             show-empty
-                            :busy="!tablaCargada" :items="tours" :fields="columnas">
+                            :busy="!tablaCargada" :items="panos" :fields="columnas">
                         <template v-slot:table-busy>
                             <div class="text-center text-danger my-2">
                                 <b-spinner class="align-middle"></b-spinner>
@@ -135,7 +135,7 @@
     let audioActual = null
 
     export default {
-        name: "ToursView",
+        name: "PanosView",
         components: {
             PanoView,
             ArchivoSelectorView,
@@ -154,14 +154,13 @@
         },
         data(){
             return{
-                instanciaTour:'tour-view',
                 panoId:{
                     tourIdVisor: null,
                     panoIdVisor: null,
                 },
                 tipo:Archivo.TIPO_SONIDO,
                 cargando:false,
-                totalRow:1000,
+                // totalRow:1000,
                 perPage:5,
                 sortBy:'',
                 sortDesc:false,
@@ -183,13 +182,13 @@
         },
         mounted() {
             this.loadParametros()
-            this.cargarToursInterno()
+            this.cargarPanosInterno()
             if(this.propMotivoId){
                 this.$bvModal.show('modal-motivo-submotivo')
             }
-            if(this.tablaCargada){
-                this.totalRow = this.tours.length
-            }
+            // if(this.tablaCargada){
+            //     this.totalRow = this.panos.length
+            // }
         },
         destroyed() {
             this.pararFondoTour()
@@ -209,16 +208,22 @@
                 this.$router.push(addQuery(this.$route,{add:{tour_sort_desc:this.sortDesc}})).catch(()=>{})
             },
             propPage(){
-                this.cargarToursInterno()
+                this.cargarPanosInterno()
             },
             propSortDesc(){
-                this.cargarToursInterno()
+                this.cargarPanosInterno()
             },
             propSortBy(){
-                this.cargarToursInterno()
+                this.cargarPanosInterno()
             },
             propBuscar(){
-                this.cargarToursInterno()
+                this.cargarPanosInterno()
+            },
+            lastPage(lp){
+                //todo: aldo: hacer esta comprobacion siempre
+                if(this.page > lp){
+                    this.paginationClick(lp)
+                }
             },
             // formBuscar(b){
             //     this.$router.push(addQuery(this.$route,{add:{tour_buscar:b}})).catch(()=>{})
@@ -230,14 +235,32 @@
                 'checkPermiso',
             ]),
             ...mapGetters({
-                // tours: 'tour_tours',
+                // panos: 'tour_panos',
                 tablaCargada: 'tour_cargado'
             }),
-            tours(){
-                return this.$store.getters.tour_tours(this.instanciaTour)
+            totalRow(){
+                return this.$store.getters.pano_total(this.instanciaPano)
+            },
+            lastPage(){
+                return this.$store.getters.pano_last_page(this.instanciaPano)
+            },
+            params(){
+                return {
+                    perPage: this.perPage,
+                    page: this.propPage,
+                    nombre: this.propBuscar,
+                    sortBy: this.propSortBy,
+                    sortDesc: this.propSortDesc?'desc':'asc',
+                }
+            },
+            instanciaPano(){
+                return 'panos-view-'+JSON.stringify(this.params)
+            },
+            panos(){
+                return this.$store.getters.pano_panos(this.instanciaPano)
             },
             titulo(){
-                let titulo = 'Tours'
+                let titulo = 'Panos'
                 return titulo
             },
             permisoParaVer(){
@@ -246,7 +269,7 @@
         },
         methods:{
             ...mapActions({
-                cargarTours: 'tour_cargar',
+                cargarPanos: 'pano_cargar',
                 toggleEstadoTour: 'tour_view_toggle_estado',
                 editarTour: 'tour_view_editar',
                 crearTour: 'tour_view_crear_nuevo',
@@ -254,6 +277,7 @@
                 pararFondoTour: 'tour_view_parar_sonido',
                 asignarFondoTour: 'tour_asignar_fondo',
                 eliminarFondoTour: 'tour_eliminar_fondo',
+                crearPano: 'pano_view_crear_pano',
             }),
             loadParametros(){
                 this.page = this.propPage
@@ -261,25 +285,18 @@
                 this.sortDesc = this.propSortDesc
                 this.formBuscar = this.propBuscar
             },
-            cargarToursInterno(){
-                this.cargarTours({
-                    idInstancia:this.instanciaTour,
-                    params:{
-                        perPage: this.perPage,
-                        page: this.propPage,
-                        nombre: this.propBuscar,
-                        sortBy: this.propSortBy,
-                        sortDesc: this.propSortDesc?'desc':'asc',
-                        with: ['fondo'],
-                        withCount: ['panos']
-                    }
-                }).then(({response})=>{
-                    this.totalRow = response.data.total
-                    //todo: aldo: hacer esta comprobacion siempre
-                    if(this.page > response.data.last_page){
-                        this.paginationClick(response.data.last_page)
-                    }
+            cargarPanosInterno(){
+                this.cargarPanos({
+                    idInstancia:this.instanciaPano,
+                    params:this.params,
                 })
+                // .then(({response})=>{
+                //     this.totalRow = response.data.total
+                //     //todo: aldo: hacer esta comprobacion siempre
+                //     if(this.page > response.data.last_page){
+                //         this.paginationClick(response.data.last_page)
+                //     }
+                // })
             },
             paginationClick(page){
                 if(page !== this.page){
@@ -298,11 +315,11 @@
                 this.asignarFondoTour({archivo,tour})
                 this.$bvModal.hide('modal-tour-archivo')
             },
-            verVisor(tour){
+            verVisor(pano){
                 // this.$router.push(addQuery(this.$route,{},`/tour/${tour.id}/visor`))
                 this.panoId = {
-                    panoIdVisor : null,
-                    tourIdVisor : tour.id,
+                    panoIdVisor : pano.id,
+                    tourIdVisor : null,
                 }
             },
             abrirTour(tour){
@@ -311,6 +328,11 @@
             crearTourInterno(){
                 this.crearTour()
             },
+            crearPanoInterno(){
+                this.crearPano().then(()=>{
+                    this.cargarPanosInterno()
+                })
+            }
         },
     }
 </script>

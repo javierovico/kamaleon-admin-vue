@@ -15,8 +15,13 @@ function krpanoplugin() {
         plugin = pluginobject;
         plugin.registerattribute("idpadre",idpadre, set_padre, get_padre);
         plugin.carga_dinamica = action_cargaDinamica;
+        plugin.actualizar_hotspots = actualizar_hotspots;
         plugin.notificar_cargado = notificar_cargado;
         plugin.cambiar_pano = cambiar_pano;
+        plugin.send_click = send_click;
+        plugin.view_change = view_change;
+        plugin.scene_change = scene_change;
+        plugin.manejar_error = manejar_error;
         action_cargaDinamica('iniciado')
     }
 
@@ -38,7 +43,47 @@ function krpanoplugin() {
     }
 
     function cambiar_pano(pano_id) {
-        krpano.call(`loadscene(pano${pano_id}, null, MERGE)`)
+        krpano.set('panoIdInicial',pano_id)
+        krpano.call(`skin_loadscene_original(pano${pano_id},skin_settings.loadscene_blend_next)`)
+        // krpano.call(`loadscene(pano${pano_id}, null, MERGE)`)
+    }
+
+    function manejar_error(error){
+        const errorChange = krpano.get('errorChange')
+        if(errorChange){
+            errorChange(error)
+        }
+    }
+
+    function scene_change(scene) {
+        const panoId = parseInt(krpano.get(`scene[${scene}].name`).substr(4))
+        const sceneChange = krpano.get('sceneChange')
+        if(sceneChange){
+            sceneChange(panoId)
+        }
+    }
+
+    function view_change(){
+        const viewChange = krpano.get('viewChange');
+        const sceneName = krpano.get('xml.scene')
+        if(viewChange && sceneName){
+            const panoId = parseInt(sceneName.substr(4))
+            let h = krpano.get('view.hlookat')
+            let v = krpano.get('view.vlookat')
+            viewChange(panoId,h,v)
+        }
+    }
+
+    function send_click(h,v) {
+        const loadClick = krpano.get('loadClick');
+        if(loadClick){
+            const panoId = parseInt(krpano.get('xml.scene').substr(4))
+            loadClick(panoId,h,v)
+        }
+    }
+
+    function actualizar_hotspots() {
+        console.log('removing');
     }
 
     /**
@@ -59,6 +104,7 @@ function krpanoplugin() {
         const arrayKrpanoScenes = krpano.get("scene")
         for(let i = arrayKrpanoScenes.count-1; i >= 0 ; i--){
             arrayKrpanoScenes.removeItem(i)
+            krpano.call(`removelayer(skin_thumb_${i})`)
         }
         // krpano.get("scene").getArray().forEach(e=>{
         //     krpano.set(`scene[${e.name}].name`,null)
@@ -87,21 +133,22 @@ function krpanoplugin() {
                       hlookat="0.000000"
                       vlookat="0.000000"/>
                 <preview url="${raizArchivos}/${p.archivo}/preview.jpg" type="CUBESTRIP" striporder="FRBLUD" />`
-            contenido += `<image type="CUBE" multires="true" baseindex="0" tilesize="512" devices="!androidstock|webgl">`
-            for(let level = p.zoom; level >= 0 ; level-- ){
-                //Se crean los levels
-                contenido += `<level tiledimagewidth="${cortes[level]*512}" tiledimageheight="${cortes[level]*512}">`
-                levels.forEach((l,i)=>{
-                    contenido += `<${l} url="${raizArchivos}/${p.archivo}/${i}/${level}/%v_%u.jpg"/>`
-                })
-                contenido += `</level>`
+            if(p.zoom >= 0){
+                contenido += `<image type="CUBE" multires="true" baseindex="0" tilesize="512" devices="!androidstock|webgl">`
+                for(let level = p.zoom; level >= 0 ; level-- ){
+                    //Se crean los levels
+                    contenido += `<level tiledimagewidth="${cortes[level]*512}" tiledimageheight="${cortes[level]*512}">`
+                    levels.forEach((l,i)=>{
+                        contenido += `<${l} url="${raizArchivos}/${p.archivo}/${i}/${level}/%v_%u.jpg"/>`
+                    })
+                    contenido += `</level>`
+                }
+                contenido += `</image>`
             }
-            contenido += `</image>`
+            contenido += `<image type="CUBE" devices="androidstock.and.no-webgl">`
             levels.forEach((l,i)=>{
                 contenido += `<${l} url="${raizArchivos}/${p.archivo}/mobile/${i}.jpg"/>`
             })
-            contenido += `<image type="CUBE" devices="androidstock.and.no-webgl">`
-
             contenido += `</image>`
             tourSpots.filter(ts=> ts.fuente === p.id).forEach(spot=>{
                 const destinoPano = panoramas.find(p=> p.id === spot.destino)
@@ -119,6 +166,7 @@ function krpanoplugin() {
                         />`
             })
             //fin de contenido
+            console.log(contenido)
             krpano.set(`scene[${nombrePano}].content`,contenido)
             if(p.gps_lat && p.gps_lng){
                 krpano.set(`scene[${nombrePano}].lat`,p.gps_lat);
@@ -143,9 +191,21 @@ function krpanoplugin() {
         const scenes = krpano.get("scene").getArray();
         if(scenes.length){
             //TODO: ver por aca si hace falta cambiar la escena inicial
-            krpano.call(`loadscene(${scenes[0].name}, null, MERGE)`)
+            const panoIdInicial = krpano.get(`panoIdInicial`)
+            if(panoIdInicial){
+                krpano.call(`loadscene(pano${panoIdInicial}, null, MERGE)`)
+            }else{
+                krpano.call(`loadscene(${scenes[0].name}, null, MERGE)`)
+                scene_change(scenes[0].name)
+            }
+            const vistaH = krpano.get('vistaH')
+            const vistaV = krpano.get('vistaV')
+            if(vistaH || vistaV){
+                krpano.call(`moveto(${vistaH},${vistaV})`)
+            }
             krpano.call(`skin_startup`)
         }
+        window.krpano = krpano
     }
 
 }

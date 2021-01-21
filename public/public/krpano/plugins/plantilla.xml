@@ -59,6 +59,11 @@
 		   	onloaded="notificar_cargado();"
     />
 
+	<events onloaderror="plugin[cargador].manejar_error(get(lasterror));"/>
+
+	<events  onsingleclick="screentosphere(mouse.x, mouse.y, m_ath, m_atv);plugin[cargador].send_click(get(m_ath),get(m_atv));" />
+	<events  onviewchanged="plugin[cargador].view_change();" />
+
     <!-- TODO:  Crea el evento de escucha para escuchar cambios de panoramas  -->
     <events enabled="false" name="notificarpano" onnewpano="js( establecerPanoActual(get(xml.scene), 'j'));" keep="true"/>
     <!-- TODO: no se porque, pero parece que se solapa con el de arriba -->

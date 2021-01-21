@@ -83,6 +83,21 @@ const mutations = {
                     },
                 ]
             },
+            {
+                nombre: 'Panoramas',
+                link:null,
+                permiso:null,
+                nivel:null,
+                tipo: 'dropdown',
+                hijos: [
+                    {
+                        nombre:'Panoramas',
+                        link:'/panoramas',
+                        permiso:'empresa_listar',
+                        nivel:'general',        //'general','empresa','sucursal','any' => le dice que tiene que tener ese acceso en modo de general
+                    },
+                ]
+            },
         ]
         // .map(mt=>{
         //     switch (mt.tipo) {

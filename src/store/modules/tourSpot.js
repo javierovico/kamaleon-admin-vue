@@ -3,44 +3,35 @@ import Tour from "@/store/modelos/Tour";
 import Vue from 'vue'
 import {crearArrayPreguntas} from "@/Utils";
 import TourSpot from "@/store/modelos/TourSpot";
+import {instanciaByTourId} from "@/store/modules/tour";
 
 const state = {
-    status: "",
-    tourSpots: [],
-    tourSpotById: null,
-    audioActual: null,
+    instancias: [],
+    // status: "",
+    // tourSpots: [],
+    // tourSpotById: null,
+    // audioActual: null,
 };
 
 const getters = {
-    tourSpot_tourSpots: state => state.tourSpots,
-    tourSpot_tourSpot_by_id: state => state.tourSpotById,
-    tourSpot_cargado: state => state.status === 'cargado',
-    tourSpot_cargando: state => state.status === 'cargando'
+    tourSpot_instancia: state => idInstancia => state.instancias.find(o=> o.idInstancia = idInstancia),
+    tourSpot_tourSpots: (state,getters) => idInstancia => {
+        const instancia = getters.tourSpot_instancia(idInstancia)
+        if(instancia){
+            return instancia.tourSpots
+        }else{
+            return []
+        }
+    },
+    tourSpot_cargado: (state,getters) => idInstancia => getters.tourSpot_instancia(idInstancia).status === 'cargado',
 }
 
 const actions = {
-    tourSpot_eliminar_fondo({dispatch,getters},{tourSpot}){
-        Vue.swal.fire({
-            title: `Desasignar fondo del TourSpotrama ${tourSpot.nombre}?`,
-            html: `Se guardara un registro de cambio hecho por el usuario ${getters.userName}`,
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: `Si,Eliminar!`,
-            cancelButtonText: 'Cancelar',
-        }).then(result=> {
-            if (result.isConfirmed) {
-                let tourSpotEdit = TourSpot.fromSource(tourSpot)
-                tourSpotEdit.fondo_id = 0
-                dispatch('tourSpot_guardar_cambios',{tourSpot:tourSpotEdit})
-            }
-        })
+    tourSpot_agregar_spots({commit},{tourSpots}){
+        commit('tourSpot_agregar_spots',{tourSpots})
     },
-    tourSpot_asignar_fondo({dispatch},{archivo,tourSpot}){
-        let tourSpotEdit = TourSpot.fromSource(tourSpot)
-        tourSpotEdit.fondo_id = archivo.id
-        dispatch('tourSpot_guardar_cambios',{tourSpot:tourSpotEdit})
+    tourSpot_borrar_spots_by_panos_tour({commit},{tour,panoFuente,panoDestino}){
+        commit('tourSpot_borrar_spots_by_panos_tour',{tour,panoFuente,panoDestino})
     },
     tourSpot_guardar_cambios({commit,dispatch,getters},{tourSpot}){
         const callBack = ()=> new Promise((res,rej)=>{
@@ -105,30 +96,41 @@ const actions = {
             }
         })
     },
-    tourSpot_cargar_by_tour_id({ commit, dispatch }, {id,params,soloRetornar}) {
+    tourSpot_cargar_by_tour_id({ commit, dispatch, getters}, {id,params,soloRetornar}) {
+        const idInstancia = instanciaByTourId(id)
+        if(!params){
+            params = {}
+        }
+        if(!(params.perPage)){
+            params.perPage = 100
+        }
         return new Promise((resolve, reject) => {
-            if(!soloRetornar){
-                commit('tourSpot_cargando');
+            if(getters.tour_cargado(idInstancia)){
+                resolve({idInstancia})
+            }else{
+                if(!soloRetornar){
+                    commit('tourSpot_cargando',{idInstancia});
+                }
+                axios({
+                    url: Tour.urlCargaFromId(id) + TourSpot.URL_DESCARGA+'?XDEBUG_SESSION_START=PHPSTORM',
+                    params: params,
+                    method: 'GET'
+                })
+                    .then(response => {
+                        const tourSpots = response.data.data.map(p=>TourSpot.fromSource(p))
+                        if(!soloRetornar){
+                            commit('tourSpot_cargado', {tourSpots,idInstancia})
+                        }
+                        resolve({response,tourSpots,idInstancia})
+                    })
+                    .catch(err => {
+                        if(!soloRetornar){
+                            commit('tourSpot_error', {error:err,idInstancia})
+                            dispatch('general_error',err)
+                        }
+                        reject(err)
+                    })
             }
-            axios({
-                url: Tour.urlCargaFromId(id) + TourSpot.URL_DESCARGA+'?XDEBUG_SESSION_START=PHPSTORM',
-                params: params,
-                method: 'GET'
-            })
-                .then(response => {
-                    const tourSpots = response.data.data.map(p=>TourSpot.fromSource(p))
-                    if(!soloRetornar){
-                        commit('tourSpot_cargado', {tourSpots})
-                    }
-                    resolve({response,tourSpots})
-                })
-                .catch(err => {
-                    if(!soloRetornar){
-                        commit('tourSpot_error', err)
-                        dispatch('general_error',err)
-                    }
-                    reject(err)
-                })
         });
     },
     tourSpot_cargar_by_tour({ commit, dispatch }, {tour,params}) {
@@ -159,6 +161,27 @@ const actions = {
 };
 
 const mutations = {
+    tourSpot_borrar_spots_by_panos_tour: (state,{tour,panoFuente,panoDestino}) => {
+        const idInstancia = instanciaByTourId(tour.id)
+        const tourSpotsDelTour = state.instancias.find(o=>o.idInstancia === idInstancia).tourSpots
+        for(let i = tourSpotsDelTour.length -1 ; i>=0 ; i--){
+            if((tourSpotsDelTour[i].fuente === panoFuente.id && tourSpotsDelTour[i].destino === panoDestino.id) || (tourSpotsDelTour[i].destino === panoFuente.id && tourSpotsDelTour[i].fuente === panoDestino.id)){
+                tourSpotsDelTour.splice(i,1)
+            }
+        }
+    },
+    tourSpot_agregar_spots: (state,{tourSpots}) => {
+        tourSpots.forEach(tourSpot=>{
+            const idInstancia = instanciaByTourId(tourSpot.tour_id)
+            const tourSpotsDelTour = state.instancias.find(o=>o.idInstancia === idInstancia).tourSpots
+            const tourSpotEncontrado = tourSpotsDelTour.find(ts=>ts.id === tourSpot.id)
+            if(tourSpotEncontrado){
+                tourSpotEncontrado.actualizarCambios(tourSpot)
+            }else{
+                tourSpotsDelTour.push(tourSpot)
+            }
+        })
+    },
     tourSpot_modificado: (state,{tourSpot}) =>{
         let tourSpotBase = state.tourSpots.find(t=>t.id === tourSpot.id)
         if(tourSpotBase){
@@ -167,20 +190,32 @@ const mutations = {
             state.tourSpots.push(tourSpot)
         }
     },
-    tourSpot_cargando: state => {
-        state.status = "cargando";
+    tourSpot_cargando: (state,{idInstancia}) => {
+        let instancia = state.instancias.find(o=>o.idInstancia === idInstancia)
+        if(!instancia){
+            instancia = {
+                idInstancia: idInstancia,
+                tourSpots: [],
+                status: '',
+            }
+            state.instancias.push(instancia)
+        }
+        instancia.status = 'cargando'
+        instancia.tourSpots.splice(0,instancia.tourSpots.length)
+
     },
-    tourSpot_cargado: (state,{tourSpots}) =>{
-        state.status = 'cargado'
-        state.tourSpots = tourSpots
+    tourSpot_cargado: (state,{tourSpots,idInstancia}) =>{
+        let instancia = state.instancias.find(o=>o.idInstancia === idInstancia)
+        instancia.status = 'cargado'
+        instancia.tourSpots = tourSpots
     },
     tourSpot_cargado_by_id: (state,{response}) =>{
         state.status = 'cargado'
         state.tourSpotById = TourSpot.fromSource(response.data)
     },
-    tourSpot_error: (state,error) => {
-        state.status = "error";
-        // state.tourSpots.splice(0,state.tourSpots.length)
+    tourSpot_error: (state, {error,idInstancia}) => {
+        let instancia = state.instancias.find(o=>o.idInstancia === idInstancia)
+        instancia.status = "error";
     },
 };
 

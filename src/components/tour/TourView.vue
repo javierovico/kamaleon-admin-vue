@@ -34,7 +34,7 @@
                             responsive
                             striped hover
                             show-empty
-                            :busy="!tour" :items="panos" :fields="columnas">
+                            :busy="!panosCargado" :items="panos" :fields="columnas">
                         <template v-slot:table-busy>
                             <div class="text-center text-danger my-2">
                                 <b-spinner class="align-middle"></b-spinner>
@@ -74,7 +74,10 @@
                                     <b-button size="sm" variant="outline-info" class="mb-2" @click.prevent="editarTour({tour:data.item})">
                                         <b-icon icon="pencil"  ></b-icon>
                                     </b-button>
-                                    <b-button v-b-tooltip.hover title="Ver Panorama" size="sm" variant="outline-info" class="mb-2" @click.prevent="verPanorama(data.item)">
+                                    <b-button v-b-tooltip.hover title="Ver en visor1" size="sm" variant="outline-info" class="mb-2" @click.prevent="verPanorama(data.item,instanciaVisor1.id)">
+                                        <b-icon icon="eye"  ></b-icon>
+                                    </b-button>
+                                    <b-button v-b-tooltip.hover title="Ver en visor2" size="sm" variant="outline-info" class="mb-2" @click.prevent="verPanorama(data.item,instanciaVisor2.id)">
                                         <b-icon icon="eye"  ></b-icon>
                                     </b-button>
                                 </div>
@@ -96,13 +99,40 @@
                             @change="paginationClick"
                     ></b-pagination>
                 </b-col>
+                <b-col cols="12">
+                    <b-form-checkbox v-model="modoEditHotspot" name="check-button" switch size="lg">
+                        Modo Hotspot: <b>{{ modoEditHotspot?'Activo':'Inactivo' }}</b>
+                    </b-form-checkbox>
+                </b-col>
             </b-row>
         </b-container>
         <PanoView
                 :prop-id="panoId"
-                :prop-pano-id="panoVisor"
-                prop-id-div="id-tour-view"
+                :prop-pano-id="instanciaVisor1.panoId"
+                :prop-id-div="instanciaVisor1.id"
+                :prop-h="instanciaVisor1.h"
+                :prop-v="instanciaVisor1.v"
+                @panoClick="panoClick"
+                @viewChange="viewChange($event,instanciaVisor1.id)"
+                @panoChange="panoChange($event,instanciaVisor1.id)"
+                @errorChange="errorChange"
         />
+        h:{{instanciaVisor1.h}} v: h:{{instanciaVisor1.v}}
+        <template v-if="modoEditHotspot">
+            <PanoView
+                    :prop-id="panoId"
+                    :prop-pano-id="instanciaVisor2.panoId"
+                    :prop-id-div="instanciaVisor2.id"
+                    :prop-h="instanciaVisor2.h"
+                    :prop-v="instanciaVisor2.v"
+                    @panoClick="panoClick"
+                    @viewChange="viewChange($event,instanciaVisor2.id)"
+                    @panoChange="panoChange($event,instanciaVisor2.id)"
+            />
+            h:{{instanciaVisor2.h}} v: h:{{instanciaVisor2.v}}
+            <button @click="crearHotspotInterno">Crear Hotspot</button>
+            <button @click="borrarHotspotInterno">Borrar Hotspot</button>
+        </template>
         <b-modal id="modal-seleccion-archivo"
                  title="Sonido de fondo"
                  size="xl"
@@ -123,12 +153,22 @@
                     @seleccionado="panoramaSeleccionado($event,tourSeleccionadoPanorama)"
             />
         </b-modal>
+        <!--    Para seleccionar panorama de destino    -->
+        <b-modal id="modal-seleccion-panorama-destino"
+                 title="Seleccion Panorama Destino Hotspot"
+                 size="xl"
+                 :no-enforce-focus="true"
+        >
+            <PanoramaSelector
+                    :propTipo="tipo"
+                    @seleccionado="panoramaSeleccionadoHotspot(spotConfig.panoFuente,$event,spotConfig.tour,spotConfig.h,spotConfig.v)"
+            />
+        </b-modal>
     </div>
 </template>
 
 <script>
     /* eslint-disable no-use-before-define */
-    import axios from "axios";
     import {addQuery} from "@/Utils";
     import {mapActions, mapGetters} from "vuex";
     import SinAcceso from "@/components/random/SinAcceso";
@@ -136,6 +176,7 @@
     import Archivo from "@/store/modelos/Archivo";
     import PanoView from "@/components/pano/PanoView";
     import PanoramaSelector from "@/components/archivo/PanoramaSelectorView";
+
     let audioActual = null
 
     export default {
@@ -160,13 +201,33 @@
         },
         data(){
             return{
-                // tourIdVisor: null,
-                // panoIdVisor: null,
+                modoEditHotspot:true,
+                visores:[
+                    {
+                        id:'id-tour-view',
+                        h:50.0,
+                        v:0.0,
+                        panoId:null,
+                    },
+                    {
+                        id:'id-tour-view-2',
+                        h:0.0,
+                        v:15.0,
+                        panoId:240,
+                    }
+                ],
+                spotConfig: {
+                    panoFuente:null,
+                    tour:null,
+                    h:null,
+                    v:null,
+                },
                 panoId:{
                     tourIdVisor: null,
                     panoIdVisor: null,
                 },
-                panoVisor:null, //el pano que se esta viendo (el seleccionado)
+                // panoVisor:null, //el pano que se esta viendo (el seleccionado)
+                // panoVisor2:null, //el pano que se esta viendo (el seleccionado en la segunda pantalla)
                 tipo:Archivo.TIPO_SONIDO,
                 cargando:false,
                 totalRow:1000,
@@ -228,10 +289,25 @@
                 'checkPermiso',
             ]),
             ...mapGetters({
-                tour: 'tour_tour_by_id',
-                panos: 'pano_panos',
+                // tour: 'tour_tour_by_id',
+                // panos: 'pano_panos',
                 tablaCargada: 'tour_cargado'
             }),
+            instanciaVisor1(){
+                return this.visores.find(v=>v.id==='id-tour-view')
+            },
+            instanciaVisor2(){
+                return this.visores.find(v=>v.id==='id-tour-view-2')
+            },
+            tour(){
+                return this.$store.getters.tour_tour_by_id(this.propTourId)
+            },
+            panos(){
+                return this.$store.getters.pano_panos_by_tour_id(this.propTourId)
+            },
+            panosCargado(){
+                return this.$store.getters.pano_cargado_by_tour_id(this.propTourId)
+            },
             // panos(){
             //     return this.tour?this.tour.panos:[]
             // },
@@ -305,6 +381,7 @@
                 }
             },
             buscarUsuarios(){
+
                 this.$router.push(addQuery(this.$route,{add:{tour_buscar:this.formBuscar}})).catch(()=>{})
             },
             agregarArchivo(pano){
@@ -315,8 +392,15 @@
                 this.asignarSonidoPano({archivo,pano})
                 this.$bvModal.hide('modal-seleccion-archivo')
             },
-            verPanorama(pano){
-                this.panoVisor = pano.id
+            verPanorama(pano,visor){
+                const instancia = this.visores.find(v=>v.id===visor)
+                instancia.panoId = pano.id
+                // if(visor===1){
+                //     this.panoVisor = pano.id
+                // }else if(visor===2){
+                //     this.panoVisor2 = pano.id
+                // }
+
                 // this.$router.push(addQuery(this.$route,{},`/pano/${pano.id}/visor`))
                 // this.panoId = {
                 //     panoIdVisor : pano.id,
@@ -336,6 +420,57 @@
             desasignarTourInterno(pano){
                 this.$store.dispatch('tour_desasignar_panorama',{tour:this.tour,pano})
             },
+            panoClick(panoId,h,v){
+                // eslint-disable-next-line no-constant-condition
+                if(this.tour && this.modoEditHotspot && false){
+                    this.spotConfig.panoFuente = this.panos.find(p => p.id === panoId)
+                    this.spotConfig.tour = this.tour
+                    this.spotConfig.h = h
+                    this.spotConfig.v = v
+                    this.$bvModal.show('modal-seleccion-panorama-destino')
+                }
+            },
+            panoramaSeleccionadoHotspot(panoFuente,panoDestino,tour,h,v){
+                this.$store.dispatch('tour_asignar_spot',{tour,panoFuente,panoDestino,h,v})
+                this.$bvModal.hide('modal-seleccion-panorama-destino')
+            },
+            borrarHotspotInterno(){
+                const {tour} = this
+                const panoFuente = this.$store.getters.pano_find_by_id(this.instanciaVisor1.panoId)
+                const panoDestino = this.$store.getters.pano_find_by_id(this.instanciaVisor2.panoId)
+                this.$store.dispatch('tour_desasignar_spot',{tour,panoFuente,panoDestino})
+            },
+            crearHotspotInterno(){
+                const {tour} = this
+                const panoFuente = this.$store.getters.pano_find_by_id(this.instanciaVisor1.panoId)
+                const panoDestino = this.$store.getters.pano_find_by_id(this.instanciaVisor2.panoId)
+                if(panoFuente.id === panoDestino.id){
+                    this.$store.dispatch('general_error',`Pano fuente no puede ser igual a pano Destino`)
+                    return
+                }
+                const en_h = this.instanciaVisor1.h
+                const en_v = this.instanciaVisor1.v
+                const a_h = this.instanciaVisor2.h
+                const a_v = this.instanciaVisor2.v
+                this.$store.dispatch('tour_asignar_spot',{tour,panoFuente,panoDestino,en_h,en_v,a_h,a_v})
+            },
+            viewChange({panoId, h, v},idVisor){
+                const instancia = this.visores.find(v=>v.id===idVisor)
+                instancia.h = h
+                instancia.v = v
+            },
+            panoChange(panoId,idVisor){
+                const instancia = this.visores.find(v=>v.id===idVisor)
+                instancia.panoId = panoId
+            },
+            errorChange(error){//hotspot[pano4_img] - loading of 'https://s3.us-east-2.amazonaws.com/kamaleon360.panos/akati/akati_6/thumbnail_hotspot.png' failed!
+                if(/^hotspot\[pano[0-9]+_img] - loading of '.*' failed!$/i.test(error)){
+                    let panoId = error.substr(12)
+                    panoId = parseInt(panoId.substring(0,panoId.indexOf('_img] - loading of')))
+                    let pano = this.$store.getters.pano_find_by_id(panoId)
+                    this.$store.dispatch('pano_crear_thumb',{pano})
+                }
+            }
         },
     }
 </script>
