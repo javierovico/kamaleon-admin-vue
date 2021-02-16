@@ -298,6 +298,8 @@ const mutations = {
             state.instancias.push(instancia)
         }
         instancia.status = 'cargando'
+        instancia.last_page = 1000
+        instancia.total = 1
         instancia.panos.splice(0,instancia.panos.length)
     },
     pano_cargado: (state,{panos,idInstancia,last_page,total}) =>{
